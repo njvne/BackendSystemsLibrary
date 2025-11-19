@@ -1,0 +1,81 @@
+CREATE SEQUENCE bookcopies_seq START WITH 1 INCREMENT BY 50;
+
+CREATE SEQUENCE books_seq START WITH 1 INCREMENT BY 50;
+
+CREATE SEQUENCE borrowing_seq START WITH 1 INCREMENT BY 50;
+
+CREATE SEQUENCE reservations_seq START WITH 1 INCREMENT BY 50;
+
+CREATE SEQUENCE users_seq START WITH 1 INCREMENT BY 50;
+
+CREATE TABLE bookcopies
+(
+    copyid BIGINT NOT NULL,
+    isbn   BIGINT NOT NULL,
+    CONSTRAINT pk_bookcopies PRIMARY KEY (copyid)
+);
+
+CREATE TABLE books
+(
+    isbn              BIGINT       NOT NULL,
+    title             BIGINT       NOT NULL,
+    author            VARCHAR(255) NOT NULL,
+    description       VARCHAR(255) NOT NULL,
+    dateofpublication VARCHAR(255) NOT NULL,
+    CONSTRAINT pk_books PRIMARY KEY (isbn)
+);
+
+CREATE TABLE borrowing
+(
+    borrowid   BIGINT  NOT NULL,
+    userid     INT     NOT NULL,
+    bookcopyid BIGINT  NOT NULL,
+    isactive   BOOLEAN NOT NULL,
+    CONSTRAINT pk_borrowing PRIMARY KEY (borrowid)
+);
+
+CREATE TABLE reservations
+(
+    reservationid BIGINT  NOT NULL,
+    userid        INT     NOT NULL,
+    bookcopyid    BIGINT  NOT NULL,
+    isactive      BOOLEAN NOT NULL,
+    CONSTRAINT pk_reservations PRIMARY KEY (reservationid)
+);
+
+CREATE TABLE users
+(
+    userid      INT          NOT NULL,
+    name        VARCHAR(255) NOT NULL,
+    surname     VARCHAR(255) NOT NULL,
+    phonenumber BIGINT,
+    email       VARCHAR(255) NOT NULL,
+    CONSTRAINT pk_users PRIMARY KEY (userid)
+);
+
+ALTER TABLE borrowing
+    ADD CONSTRAINT uc_borrowing_bookcopyid UNIQUE (bookcopyid);
+
+ALTER TABLE borrowing
+    ADD CONSTRAINT uc_borrowing_userid UNIQUE (userid);
+
+ALTER TABLE reservations
+    ADD CONSTRAINT uc_reservations_bookcopyid UNIQUE (bookcopyid);
+
+ALTER TABLE reservations
+    ADD CONSTRAINT uc_reservations_userid UNIQUE (userid);
+
+ALTER TABLE bookcopies
+    ADD CONSTRAINT FK_BOOKCOPIES_ON_ISBN FOREIGN KEY (isbn) REFERENCES books (isbn);
+
+ALTER TABLE borrowing
+    ADD CONSTRAINT FK_BORROWING_ON_BOOKCOPYID FOREIGN KEY (bookcopyid) REFERENCES bookcopies (copyid);
+
+ALTER TABLE borrowing
+    ADD CONSTRAINT FK_BORROWING_ON_USERID FOREIGN KEY (userid) REFERENCES users (userid);
+
+ALTER TABLE reservations
+    ADD CONSTRAINT FK_RESERVATIONS_ON_BOOKCOPYID FOREIGN KEY (bookcopyid) REFERENCES bookcopies (copyid);
+
+ALTER TABLE reservations
+    ADD CONSTRAINT FK_RESERVATIONS_ON_USERID FOREIGN KEY (userid) REFERENCES users (userid);
