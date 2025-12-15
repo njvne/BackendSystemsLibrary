@@ -1,0 +1,12 @@
+Revisit if error codes make more sense as enum or similar
+
+
+
+UsersResult not currently necessary.
+May be required when allowing admins to display all users.
+
+
+not sure if BorrowResult is ever necessary/ applicable, even when implementing searches or similar.
+
+
+!!!BookCopies are supplementary to track the amount of books and therefor NEVER have any results/ representations

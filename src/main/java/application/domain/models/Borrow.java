@@ -3,8 +3,7 @@ import java.util.Date;
 
 public class Borrow
 {
-    private BorrowID borrowid;
-    private CopyID copyid;
+    private BookISBN isbn;
     private UserID userid;
     private Date borrowdate;
     private boolean PLACEHOLDER;
@@ -12,21 +11,14 @@ public class Borrow
 
 
     //constructor
-    public Borrow()
-    {
-        this.borrowid = new BorrowID();
-    }
+    public Borrow() {}
 
 
 
     //getters and setters
-    public BorrowID getBorrowid() { return borrowid; }
+    public BookISBN getIsbn() { return isbn; }
 
-    public void setBorrowid(BorrowID borrowid) { this.borrowid = borrowid; }
-
-    public CopyID getCopyid() { return copyid; }
-
-    public void setCopyid(CopyID copyid) { this.copyid = copyid; }
+    public void setCopyid(BookISBN isbn) { this.isbn = isbn; }
 
     public UserID getUserid() { return userid; }
 
