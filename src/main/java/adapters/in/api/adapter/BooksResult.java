@@ -18,7 +18,7 @@ public class BooksResult
 
 
 
-    public List<BookDTO> getBookDTO()
+    public List<BookDTO> getBookDTOs()
     {
         return bookDTOs;
     }

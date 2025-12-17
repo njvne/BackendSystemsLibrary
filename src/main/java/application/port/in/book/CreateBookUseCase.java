@@ -5,5 +5,5 @@ import application.domain.results.NoContentResult;
 
 public interface CreateBookUseCase
 {
-    NoContentResult createBook(Book book);
+    NoContentResult createBook(Book book, long isbn);
 }

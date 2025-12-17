@@ -4,5 +4,5 @@ import application.domain.results.BooksResult;
 
 public interface ReadBooksByFilterPort
 {
-    BooksResult loadBookByFilter(String query);
+    BooksResult loadBookByFilter(int page, String query);
 }

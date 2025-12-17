@@ -5,8 +5,16 @@ import adapters.in.api.models.BorrowDTO;
 import adapters.in.api.models.UserDTO;
 import application.domain.models.*;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class Mapper
 {
+    public List<BookDTO> booksToApiModels(List<Book> books)
+    {
+        return books.stream().map(this::bookToApiModel).collect(Collectors.toList());
+    }
+
     public BookDTO bookToApiModel(Book book)
     {
         final var bookDTO = new BookDTO();
