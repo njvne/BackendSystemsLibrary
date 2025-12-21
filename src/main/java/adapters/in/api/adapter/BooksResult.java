@@ -9,7 +9,10 @@ public class BooksResult
 
 
 
-    public BooksResult(){}
+    public BooksResult()
+    {
+
+    }
 
     public BooksResult(List<BookDTO> bookDTOs)
     {

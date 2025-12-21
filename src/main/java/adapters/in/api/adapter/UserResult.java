@@ -8,7 +8,10 @@ public class UserResult
 
 
 
-    public UserResult(){}
+    public UserResult()
+    {
+
+    }
 
     public UserResult(UserDTO UserDTO)
     {

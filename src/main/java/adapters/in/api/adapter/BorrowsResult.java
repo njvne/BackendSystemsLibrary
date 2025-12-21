@@ -9,7 +9,10 @@ public class BorrowsResult
 
 
 
-    public BorrowsResult(){}
+    public BorrowsResult()
+    {
+
+    }
 
     public BorrowsResult(List<BorrowDTO> borrowDTOs)
     {
@@ -18,7 +21,7 @@ public class BorrowsResult
 
 
 
-    public List<BorrowDTO> getBorrowDTO()
+    public List<BorrowDTO> getBorrowDTOs()
     {
         return borrowDTOs;
     }

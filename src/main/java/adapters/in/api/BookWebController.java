@@ -4,7 +4,7 @@ import adapters.in.api.adapter.BookServiceAdapter;
 import adapters.in.api.adapter.BooksResult;
 import adapters.in.api.models.BookDTO;
 import adapters.in.api.utils.Hyperlinks;
-import application.domain.models.BookISBN;
+import application.domain.results.NoContentResult;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -18,7 +18,7 @@ import java.util.List;
 
 
 @Path("library/books")    //maybe separate controllers for users, books, etc.? Refer to Unit 17 CRUD
-public class BookWebController
+public class BookWebController extends AbstractController
 {
     @Inject
     private BookServiceAdapter bookServiceAdapter;
@@ -36,8 +36,9 @@ public class BookWebController
 
     @GET
     @Produces({MediaType.APPLICATION_JSON})
-    public Response getAllBooks(@DefaultValue("") @QueryParam("search") String search, @DefaultValue("1") @PositiveOrZero @QueryParam("page") int page)
-    {           //(?! exact or containsIgnoreCase (done in persistence layer)]
+    public Response getAllBooks(@DefaultValue("") @QueryParam("search") String search,
+                                @DefaultValue("1") @PositiveOrZero @QueryParam("page") int page)
+    {           //[?! exact or containsIgnoreCase (done in persistence layer)]
         final var bookPage = search.trim().isEmpty() ? bookServiceAdapter.getAllBooks(page) : bookServiceAdapter.getBooksByQuery(page, search.trim());
         if(bookPage.getBookDTOs().isEmpty())
         {
@@ -95,6 +96,20 @@ public class BookWebController
         */
     }
 
+    @Path("/{id}")
+    @DELETE
+    public Response deleteBook(@Positive @PathParam("id") long id)
+    {
+        final var res = new NoContentResult(); //this.bookServiceAdapter.deleteById(id);
+        if(res.hasError())
+        {
+            final Response.ResponseBuilder builder = Response.status(res.getErrorCode()).entity(res.getErrorMessage());
+            //addBasicLinks();
+        }
+        final Response.ResponseBuilder builder = Response.status(HttpResponseStatus.NO_CONTENT.code());
+        //addBasicLinks();
+        return builder.build();
+    }
 
 
     private String createLocationHeader(BookDTO model)
@@ -109,9 +124,12 @@ public class BookWebController
         {
             Hyperlinks.addLink(uriInfo, builder, path + (page + 1), "next", MediaType.APPLICATION_JSON);
         }
-        else if(bookPage.getBookDTOs().size() < 20)  //how to not hardcode server-set size of pages?? Problem if its 20 and next page doesn't have any more books.
+        else if(bookPage.getBookDTOs().size() < 20 || bookServiceAdapter.getAllBooks(page + 1).getBookDTOs().isEmpty())  //how to not hardcode server-set size of pages?? Problem if its 20 and next page doesn't have any more books.
         {
-            Hyperlinks.addLink(uriInfo, builder, path + (page - 1), "prev", MediaType.APPLICATION_JSON);
+            if(page > 1)
+            {
+                Hyperlinks.addLink(uriInfo, builder, path + (page - 1), "prev", MediaType.APPLICATION_JSON);
+            }
         }
         else
         {

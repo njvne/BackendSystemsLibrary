@@ -8,7 +8,10 @@ public class BookResult
 
 
 
-    public BookResult(){}
+    public BookResult()
+    {
+
+    }
 
     public BookResult(BookDTO bookDTO)
     {

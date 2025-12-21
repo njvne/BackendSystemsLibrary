@@ -1,7 +1,9 @@
 package adapters.in.api;
 
+import adapters.in.api.models.UserDTO;
 import adapters.in.api.utils.Hyperlinks;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -10,7 +12,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 
 @Path("/library/users")
-public class UserWebController
+public class UserWebController extends AbstractController
 {
     //borrows are a subresource 1:n -> implement hyperlinks for them under /user/{userid}/borrows
 
@@ -19,8 +21,7 @@ public class UserWebController
 
 
     @POST
-    @Path("/create")
-    public Response CreateUser()
+    public Response CreateUser(@Valid UserDTO userDTO)
     {
         //todo: create user. if successful, do the below, if not, fail ig
         final Response.ResponseBuilder builder = Response.status(Response.Status.CREATED);
