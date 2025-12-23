@@ -4,9 +4,11 @@ import adapters.in.api.models.UserDTO;
 import adapters.in.api.utils.Hyperlinks;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
@@ -46,6 +48,13 @@ public class UserWebController extends AbstractController
     public Response GetUserReservations()
     {
         //todo
+        return Response.ok().build();
+    }
+
+    @POST
+    @Path("/{uid}/reservations/{isbn}")
+    public Response BorrowBook(@Positive @PathParam("uid") long uid, @Positive @PathParam("isbn") long isbn)
+    {
         return Response.ok().build();
     }
     //since I plan to include selflinks to the books in the list of reservations,

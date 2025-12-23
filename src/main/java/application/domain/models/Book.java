@@ -11,6 +11,7 @@ public class Book
     private String description;
     private Date publicationDate;
     private int copyAmount;
+    private int availableAmount;
 
 
 
@@ -62,4 +63,8 @@ public class Book
     public int getCopyAmount() {return copyAmount;}
 
     public void setCopyAmount(int copyAmount) {this.copyAmount = copyAmount;}
+
+    public int getAvailableAmount() {return availableAmount;}
+
+    public void setAvailableAmount(int availableAmount) {this.availableAmount = availableAmount;}
 }

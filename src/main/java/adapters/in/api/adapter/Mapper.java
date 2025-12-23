@@ -1,7 +1,6 @@
 package adapters.in.api.adapter;
 
 import adapters.in.api.models.BookDTO;
-import adapters.in.api.models.BorrowDTO;
 import adapters.in.api.models.UserDTO;
 import application.domain.models.*;
 
@@ -23,6 +22,8 @@ public class Mapper
         bookDTO.setAuthor(book.getAuthor());
         bookDTO.setDescription(book.getDescription());
         bookDTO.setPublicationDate(book.getPublicationDate());
+        bookDTO.setCopyAmount(book.getCopyAmount());
+        bookDTO.setAvailAmount(book.getAvailableAmount());
         return bookDTO;
     }
 
@@ -33,6 +34,8 @@ public class Mapper
         book.setAuthor(bookDTO.getAuthor());
         book.setDescription(bookDTO.getDescription());
         book.setPublicationDate(bookDTO.getPublicationDate());
+        book.setCopyAmount(bookDTO.getCopyAmount());
+        book.setAvailableAmount(bookDTO.getAvailAmount());
         return book;
     }
 

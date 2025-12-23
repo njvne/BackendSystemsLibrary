@@ -2,10 +2,12 @@ package adapters.in.api.adapter;
 
 import adapters.in.api.models.BookDTO;
 import application.domain.models.BookISBN;
+import application.domain.results.ErrorCodes;
 import application.port.in.book.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.NotFoundException;
 
 @ApplicationScoped
 public class BookServiceAdapter
@@ -47,6 +49,22 @@ public class BookServiceAdapter
         }
     }
 
+    public void deleteBook(long isbn)
+    {
+        final var domainResult = this.deleteBookUseCase.deleteBook(new BookISBN(isbn));
+        if(domainResult.hasError())
+        {
+            if(domainResult.getErrorCode() == ErrorCodes.RESOURCE_TO_DELETE_NOT_FOUND)
+            {
+                throw new NotFoundException(domainResult.getErrorMessage());
+            }
+            else
+            {
+                throw new InternalServerErrorException(domainResult.getErrorMessage());
+            }
+        }
+    }
+
     public BooksResult getAllBooks(int page)
     {
         final var domainResult = this.loadAllBooksUseCase.loadAllBooks();
@@ -70,6 +88,26 @@ public class BookServiceAdapter
         else
         {
             return new BooksResult(this.mapper.booksToApiModels(domainResult.getResult()));
+        }
+    }
+
+    public BookResult loadBookById(long isbn)
+    {
+        final var domainResult = this.loadBookByIdUseCase.loadBookByIsbn(new BookISBN(isbn));
+        if(domainResult.hasError())
+        {
+            if (domainResult.getErrorCode() == ErrorCodes.RESOURCE_NOT_FOUND)
+            {
+                throw new NotFoundException(domainResult.getErrorMessage());
+            }
+            else
+            {
+                throw new InternalServerErrorException(domainResult.getErrorMessage());
+            }
+        }
+        else
+        {
+            return new BookResult(this.mapper.bookToApiModel(domainResult.getResult()));
         }
     }
 }

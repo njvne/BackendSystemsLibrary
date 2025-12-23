@@ -1,7 +1,7 @@
 package adapters.in.api.models;
 
-import application.domain.models.BookISBN;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.ws.rs.DefaultValue;
 import jakarta.xml.bind.annotation.XmlRootElement;
 
 import java.util.Date;
@@ -17,6 +17,10 @@ public class BookDTO extends AbstractDataTransferObject
     private String description;
     @NotBlank (message = "Book must have a publication date")
     private Date publicationDate;
+    @DefaultValue("1")
+    private int copyAmount;
+    @DefaultValue("1")
+    private int availableAmount;
 
 
 
@@ -63,5 +67,25 @@ public class BookDTO extends AbstractDataTransferObject
     public void setPublicationDate(Date publicationDate)
     {
         this.publicationDate = publicationDate;
+    }
+
+    public int getCopyAmount()
+    {
+        return copyAmount;
+    }
+
+    public void setCopyAmount(int copyAmount)
+    {
+        this.copyAmount = copyAmount;
+    }
+
+    public int getAvailAmount()
+    {
+        return availableAmount;
+    }
+
+    public void setAvailAmount(int availableAmount)
+    {
+        this.availableAmount = availableAmount;
     }
 }
