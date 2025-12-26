@@ -1,6 +1,7 @@
 package adapters.in.api.adapter;
 
 import adapters.in.api.models.BookDTO;
+import adapters.in.api.models.BorrowDTO;
 import adapters.in.api.models.UserDTO;
 import application.domain.models.*;
 
@@ -61,5 +62,30 @@ public class Mapper
         user.setPhonenumber(userDTO.getPhonenumber());
         user.setBirthdate(userDTO.getBirthdate());
         return user;
+    }
+
+    public List<BorrowDTO> borrowsToApiModels(List<Borrow> borrows)
+    {
+        return borrows.stream().map(this::borrowToApiModel).collect(Collectors.toList());
+    }
+
+    public BorrowDTO borrowToApiModel(Borrow borrow)
+    {
+        final var borrowDTO = new BorrowDTO();
+        borrowDTO.setUserid(borrow.getUserid());
+        borrowDTO.setIsbn(borrow.getIsbn());
+        borrowDTO.setBorrowdate(borrow.getBorrowdate());
+        borrowDTO.setReturned(borrow.isReturned());
+        return borrowDTO;
+    }
+
+    public Borrow borrowDTOToDomainModel(BorrowDTO borrowDTO)
+    {
+        final var borrow = new Borrow();
+        borrow.setUserid(borrowDTO.getUserid());
+        borrow.setIsbn(borrowDTO.getIsbn());
+        borrow.setBorrowdate(borrowDTO.getBorrowdate());
+        borrow.setReturned(borrowDTO.isReturned());
+        return borrow;
     }
 }

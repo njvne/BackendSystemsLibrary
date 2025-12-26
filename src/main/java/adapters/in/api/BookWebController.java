@@ -14,7 +14,6 @@ import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
 
-import java.net.URI;
 import java.util.List;
 
 
@@ -31,12 +30,11 @@ public class BookWebController extends AbstractController
     private HttpHeaders httpHeaders;
 
 
-
     @GET
     @Produces({MediaType.APPLICATION_JSON})
     public Response getAllBooks(@DefaultValue("") @QueryParam("search") String search,
                                 @DefaultValue("1") @PositiveOrZero @QueryParam("page") int page)
-    {           //[?! exact or containsIgnoreCase (done in persistence layer)]
+    {
         final var bookPage = search.trim().isEmpty() ? bookServiceAdapter.getAllBooks(page) : bookServiceAdapter.getBooksByQuery(page, search.trim());
         if(bookPage.getBookDTOs().isEmpty())
         {
@@ -49,7 +47,6 @@ public class BookWebController extends AbstractController
         addPaging(page, bookPage, builder, search);
         return builder.build();
     }
-
 
 
     @Path("/{isbn}")
@@ -67,38 +64,41 @@ public class BookWebController extends AbstractController
         }
         else if(res.getAuthorizationLevel() == AuthorizationLevel.USER)
         {
-            Hyperlinks.addLink(uriInfo, builder, "/library/users/" + res.getRelatedUserID() + "reservations/" + isbn, "ReserveBook", MediaType.APPLICATION_JSON);
+            //if(result.getAvailAmount > 0)
+            //{
+            Hyperlinks.addLink(uriInfo, builder, "/library/users/" + res.getRelatedUserID() + "borrow/" + isbn, "BorrowBook", MediaType.APPLICATION_JSON);
+            //}
         }
         addDefaultLinksByAuthorizationLevel(uriInfo, builder, res);
         return builder.build();
     }
 
 
-
-    @Path("/{id}")
+    @Path("/{isbn}")
     @PUT
     @Consumes({MediaType.APPLICATION_JSON})
-    public Response updateBook(@Positive @PathParam("id") long id, @Valid BookDTO book)
+    public Response updateOrCreateBook(@Positive @PathParam("isbn") long isbn, @Valid BookDTO book)
     {
         final AuthorizationResult res = checkAuthorizationLevelWithoutId(httpHeaders);
         if(res.getAuthorizationLevel() != AuthorizationLevel.ADMIN)
         {
             return Response.status(Response.Status.UNAUTHORIZED).build();
         }
-        if(Math.random() > 0.5)   //getBookById == null
+        try
         {
-            final var result = bookServiceAdapter.createNewBook(book, id);
-            final Response.ResponseBuilder builder = Response.created(createLocationUri(result.getBookDTO()));
-            addDefaultLinksByAuthorizationLevel(uriInfo, builder, res);
-            return builder.build();
-        }
-        else {
-            //final var result = bookServiceAdapter.updateBook(id, bookdto);
+            this.bookServiceAdapter.updateBook(isbn, book);
             final Response.ResponseBuilder builder = Response.ok();
             addDefaultLinksByAuthorizationLevel(uriInfo, builder, res);
             return builder.build();
         }
+        catch(NotFoundException e)
+        {
+            final var result = bookServiceAdapter.createNewBook(book, isbn);
+            return Response.status(HttpResponseStatus.CREATED.code()).header("Location", createLocationHeader(result.getBookDTO())).build();
+            //chose not to add links other than the location header in the response. idk if that's cool or not but you get the links again after going to the location.
+        }
     }
+
 
     @Path("/{isbn}")
     @DELETE
@@ -106,14 +106,11 @@ public class BookWebController extends AbstractController
     {
         final Response.ResponseBuilder builder = Response.status(HttpResponseStatus.NO_CONTENT.code());
         AuthorizationResult res = checkAuthorizationLevelWithoutId(httpHeaders);
-        if(res.getAuthorizationLevel() == AuthorizationLevel.ADMIN)
+        if(res.getAuthorizationLevel() != AuthorizationLevel.ADMIN)
         {
-            this.bookServiceAdapter.deleteBook(isbn);
+            return Response.status(Response.Status.UNAUTHORIZED).build();
         }
-        else
-        {
-            return Response.status(HttpResponseStatus.UNAUTHORIZED.code()).build();
-        }
+        this.bookServiceAdapter.deleteBook(isbn);
         addDefaultLinksByAuthorizationLevel(uriInfo, builder, res);
         return builder.build();
     }
@@ -121,16 +118,12 @@ public class BookWebController extends AbstractController
 
 
 
-    private URI createLocationUri(BookDTO book)
-    {
-        return uriInfo.getRequestUriBuilder().path(Long.toString(book.getId())).build();
-    }
+
 
     private String createLocationHeader(BookDTO model)
     {
         return uriInfo.getRequestUriBuilder().path(Long.toString(model.getId())).build().toString();
     }
-
 
     public void addPaging(@DefaultValue("1") @PositiveOrZero int page, BooksResult bookPage, Response.ResponseBuilder builder, String query)
     {
@@ -139,8 +132,8 @@ public class BookWebController extends AbstractController
         {
             Hyperlinks.addLink(uriInfo, builder, path + (page + 1), "next", MediaType.APPLICATION_JSON);
         }
-        else if(bookPage.getBookDTOs().size() < 21 || bookServiceAdapter.getAllBooks(page + 1).getBookDTOs().isEmpty())  //how to not hardcode server-set size of pages?? Problem if its 20 and next page doesn't have any more books.
-        {
+        else if(bookPage.getBookDTOs().size() < 21)                             //how to not hardcode server-set size of pages??
+        {                                                                       //load 21 books, send only 20 to ensure there is a next page
             if(page > 1)
             {
                 Hyperlinks.addLink(uriInfo, builder, path + (page - 1), "prev", MediaType.APPLICATION_JSON);
@@ -153,8 +146,6 @@ public class BookWebController extends AbstractController
         }
         bookPage.getBookDTOs().removeLast();    //get 21 to check wether there is a next element but send only 20
     }
-
-
 
     public void addSelfLinksToBooks(List<BookDTO> books)
     {
@@ -173,9 +164,6 @@ public class BookWebController extends AbstractController
     }
 
     //todo: Update/Creation with put, Delete: ONLY WITH ADMIN PRIVILEGES!!!! Otherwise, return 403 forbidden. hyperlinks also only provided to logged in admins
-
-    //papa
-
 
     // EXAMPLE HYPERLINK MANAGER. TO IMPLEMENT: HYPERLINKS FOR BOOKS (and then for the other webcontrollers too)
     /*

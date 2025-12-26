@@ -1,5 +1,7 @@
 package adapters.in.api.adapter;
 
+import adapters.in.api.Exceptions.IllegalUpdateException;
+import adapters.in.api.Exceptions.ResourceConflictException;
 import adapters.in.api.models.BookDTO;
 import application.domain.models.BookISBN;
 import application.domain.results.ErrorCodes;
@@ -108,6 +110,28 @@ public class BookServiceAdapter
         else
         {
             return new BookResult(this.mapper.bookToApiModel(domainResult.getResult()));
+        }
+    }
+
+    public void updateBook(long isbn, BookDTO bookModel)
+    {
+        final var domainBook = this.mapper.bookDTOToDomainModel(bookModel);
+        final var domainResult = this.updateBookUseCase.updateBook(new BookISBN(isbn), domainBook);
+        if(domainResult.hasError())
+        {
+            if(domainResult.getErrorCode() == ErrorCodes.RESOURCE_TO_UPDATE_NOT_FOUND)
+            {
+                throw new NotFoundException(domainResult.getErrorMessage());
+            }
+            if(domainResult.getErrorCode() == ErrorCodes.RESOURCE_ID_DOES_NOT_MATCH)
+            {
+                throw new IllegalUpdateException(domainResult.getErrorMessage());
+            }
+            if(domainResult.getErrorCode() == ErrorCodes.RESOURCE_CONFLICT)
+            {
+                throw new ResourceConflictException(domainResult.getErrorMessage());
+            }
+            throw new InternalServerErrorException(domainResult.getErrorMessage());
         }
     }
 }

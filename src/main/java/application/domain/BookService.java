@@ -100,13 +100,13 @@ public class BookService implements CreateBookUseCase, DeleteBookUseCase, LoadAl
         return returnValue;
     }
 
-    @PostConstruct
+    /*@PostConstruct
     public void populateBooks()
     {
         final var faker = new BookDataFaker();
-        for(int i = 900000000; i < 900020000; i+=100)
+        for(long l = 9000000000L; l < 9000010000L; l += (long) Math.ceil(Math.random() * 200))
         {
-            this.createBook(faker.createModel(), i * 10L);
+            this.createBook(faker.createModel(), l);
         }
-    }
+    }*/
 }

@@ -28,6 +28,6 @@ public class SingleModelResult<E> extends AbstractResult
     @Override
     public boolean isEmpty()
     {
-        return this.isEmpty();
+        return result == null;
     }
 }

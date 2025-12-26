@@ -6,7 +6,7 @@ public class Borrow
     private BookISBN isbn;
     private UserID userid;
     private Date borrowdate;
-    private boolean PLACEHOLDER;
+    private boolean returned;
 
 
 
@@ -18,7 +18,7 @@ public class Borrow
     //getters and setters
     public BookISBN getIsbn() { return isbn; }
 
-    public void setCopyid(BookISBN isbn) { this.isbn = isbn; }
+    public void setIsbn(BookISBN isbn) { this.isbn = isbn; }
 
     public UserID getUserid() { return userid; }
 
@@ -28,7 +28,7 @@ public class Borrow
 
     public void setBorrowdate(Date borrowdate) { this.borrowdate = borrowdate; }
 
-    public boolean isPLACEHOLDER() { return PLACEHOLDER; }
+    public boolean isReturned() { return returned; }
 
-    public void setPLACEHOLDER(boolean PLACEHOLDER) { this.PLACEHOLDER = PLACEHOLDER; }
+    public void setReturned(boolean returned) { this.returned = returned; }
 }

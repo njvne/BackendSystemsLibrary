@@ -80,34 +80,6 @@ public abstract class AbstractController
         }
     }
 
-    public AuthorizationLevel checkAuthorizationLevelDispatch(HttpHeaders httpHeaders, UriInfo uriInfo, Response.ResponseBuilder builder)
-    {
-        try//necessary to process requests sent without auth
-        {
-            final String[] asArray = getUsernameAndPasswordAsArray(httpHeaders);
-            final String username = asArray[0];
-            final String password = asArray[1];
-            if (username != null && password != null)
-            {
-                //todo: check if authentication is valid. potentially include admin things too.
-                //if else: if login failed, ??give link to creation??inform user of failed login by sending dispatch with rel name "tryLoginAgain"??, else, give link to users/id
-                int id = 0;
-                Hyperlinks.addLink(uriInfo, builder, "/library/users/" + id, "getUser", "application/json");
-                //return 2; if admin
-                return AuthorizationLevel.USER;
-                //throw exception if incorrect credentials
-            }
-            else
-            {
-                throw new MissingLoginDataException();  //branch into not logged in
-            }
-        }
-        catch(Exception e)     //->"not logged in"
-        {
-            return AuthorizationLevel.NOT_LOGGED_IN;
-        }
-    }
-
 
 
     public void addDefaultLinksByAuthorizationLevel(UriInfo uriInfo, Response.ResponseBuilder builder, AuthorizationResult res)
@@ -140,7 +112,7 @@ public abstract class AbstractController
     {
         Hyperlinks.addLink(uriInfo, builder, "/library/books{search}", "getAllBooks", "application/json");
         Hyperlinks.addLink(uriInfo, builder, "/library/users" + u_id, "getOwnUser", "application/json");
-        Hyperlinks.addLink(uriInfo, builder, "/library/users" + u_id + "/reservations", "getAllOwnUserReservations", "application/json");
+        Hyperlinks.addLink(uriInfo, builder, "/library/users" + u_id + "/borrows", "getAllOwnUserBorrows", "application/json");
     }
 
 
