@@ -25,7 +25,7 @@ import java.io.Serializable;
  * This class specifies the basic requirements, that a Model should fulfill to be
  * used as a resource or a sub-resource.
  */
-public abstract class AbstractDataTransferObject implements Serializable, Cloneable
+public abstract class AbstractDataTransferObject
 {
 
 	/**

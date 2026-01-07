@@ -4,8 +4,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.xml.bind.annotation.XmlRootElement;
 
-import java.util.Date;
-
 @XmlRootElement(name = "book")
 public class BookDTO extends AbstractDataTransferObject
 {
@@ -15,10 +13,8 @@ public class BookDTO extends AbstractDataTransferObject
     private String author;
     @NotBlank (message = "Book must have a description")
     private String description;
-    @NotBlank (message = "Book must have a publication date")
-    private Date publicationDate;
     @DefaultValue("1")
-    private int copyAmount;
+    private long copyAmount;
     @DefaultValue("1")
     private int availableAmount;
 
@@ -59,22 +55,12 @@ public class BookDTO extends AbstractDataTransferObject
         this.description = description;
     }
 
-    public Date getPublicationDate()
-    {
-        return publicationDate;
-    }
-
-    public void setPublicationDate(Date publicationDate)
-    {
-        this.publicationDate = publicationDate;
-    }
-
-    public int getCopyAmount()
+    public long getCopyAmount()
     {
         return copyAmount;
     }
 
-    public void setCopyAmount(int copyAmount)
+    public void setCopyAmount(long copyAmount)
     {
         this.copyAmount = copyAmount;
     }

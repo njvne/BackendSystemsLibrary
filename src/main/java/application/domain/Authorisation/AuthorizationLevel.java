@@ -1,4 +1,4 @@
-package adapters.in.api.Authorisation;
+package application.domain.Authorisation;
 
 public enum AuthorizationLevel
 {

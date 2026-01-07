@@ -19,10 +19,10 @@ public class Mapper
     {
         final var bookDTO = new BookDTO();
         bookDTO.setId(book.getIsbn().getISBN());
+        System.out.println(bookDTO.getId());
         bookDTO.setTitle(book.getTitle());
         bookDTO.setAuthor(book.getAuthor());
         bookDTO.setDescription(book.getDescription());
-        bookDTO.setPublicationDate(book.getPublicationDate());
         bookDTO.setCopyAmount(book.getCopyAmount());
         bookDTO.setAvailAmount(book.getAvailableAmount());
         return bookDTO;
@@ -34,7 +34,6 @@ public class Mapper
         book.setTitle(bookDTO.getTitle());
         book.setAuthor(bookDTO.getAuthor());
         book.setDescription(bookDTO.getDescription());
-        book.setPublicationDate(bookDTO.getPublicationDate());
         book.setCopyAmount(bookDTO.getCopyAmount());
         book.setAvailableAmount(bookDTO.getAvailAmount());
         return book;
@@ -47,8 +46,7 @@ public class Mapper
         userDTO.setName(user.getName());
         userDTO.setSurname(user.getSurname());
         userDTO.setEmail(user.getEmail());
-        userDTO.setPhonenumber(user.getPhonenumber());
-        userDTO.setBirthdate(user.getBirthdate());
+        userDTO.setPhonenumber(String.valueOf(user.getPhonenumber()));
         return userDTO;
     }
 
@@ -59,8 +57,7 @@ public class Mapper
         user.setName(userDTO.getName());
         user.setSurname(userDTO.getSurname());
         user.setEmail(userDTO.getEmail());
-        user.setPhonenumber(userDTO.getPhonenumber());
-        user.setBirthdate(userDTO.getBirthdate());
+        user.setPhonenumber(Long.parseLong(userDTO.getPhonenumber()));
         return user;
     }
 

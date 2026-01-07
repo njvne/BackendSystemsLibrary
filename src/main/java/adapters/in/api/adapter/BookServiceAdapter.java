@@ -14,8 +14,6 @@ import jakarta.ws.rs.NotFoundException;
 @ApplicationScoped
 public class BookServiceAdapter
 {
-    @Inject
-    private CreateBookUseCase createBookUseCase;
 
     @Inject
     private DeleteBookUseCase deleteBookUseCase;
@@ -32,24 +30,9 @@ public class BookServiceAdapter
     @Inject
     private UpdateBookUseCase updateBookUseCase;
 
-    private Mapper mapper;
+    private Mapper mapper = new Mapper();
 
 
-
-    public BookResult createNewBook(BookDTO bookModel, long isbn)
-    {                                                                                                       //write isbnDTO???
-        final var domainBookModel = this.mapper.bookDTOToDomainModel(bookModel);
-        final var domainResult = this.createBookUseCase.createBook(domainBookModel, isbn);
-
-        if (domainResult.hasError())
-        {
-            throw new InternalServerErrorException(domainResult.getErrorMessage());
-        }
-        else
-        {
-            return new BookResult(bookModel);
-        }
-    }
 
     public void deleteBook(long isbn)
     {
@@ -69,7 +52,7 @@ public class BookServiceAdapter
 
     public BooksResult getAllBooks(int page)
     {
-        final var domainResult = this.loadAllBooksUseCase.loadAllBooks();
+        final var domainResult = this.loadAllBooksUseCase.loadAllBooks(page);
         if(domainResult.hasError())
         {
             throw new InternalServerErrorException(domainResult.getErrorMessage());
@@ -116,7 +99,7 @@ public class BookServiceAdapter
     public void updateBook(long isbn, BookDTO bookModel)
     {
         final var domainBook = this.mapper.bookDTOToDomainModel(bookModel);
-        final var domainResult = this.updateBookUseCase.updateBook(new BookISBN(isbn), domainBook);
+        final var domainResult = this.updateBookUseCase.updateOrCreateBook(new BookISBN(isbn), domainBook);
         if(domainResult.hasError())
         {
             if(domainResult.getErrorCode() == ErrorCodes.RESOURCE_TO_UPDATE_NOT_FOUND)

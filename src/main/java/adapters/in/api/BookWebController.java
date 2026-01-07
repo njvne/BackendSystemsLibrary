@@ -1,7 +1,7 @@
 package adapters.in.api;
 
-import adapters.in.api.Authorisation.AuthorizationLevel;
-import adapters.in.api.Authorisation.AuthorizationResult;
+import application.domain.Authorisation.AuthorizationLevel;
+import application.domain.Authorisation.AuthorizationResult;
 import adapters.in.api.adapter.BookServiceAdapter;
 import adapters.in.api.adapter.BooksResult;
 import adapters.in.api.models.BookDTO;
@@ -36,12 +36,14 @@ public class BookWebController extends AbstractController
                                 @DefaultValue("1") @PositiveOrZero @QueryParam("page") int page)
     {
         final var bookPage = search.trim().isEmpty() ? bookServiceAdapter.getAllBooks(page) : bookServiceAdapter.getBooksByQuery(page, search.trim());
+        AuthorizationResult res = checkAuthorizationLevelWithoutId(httpHeaders);
         if(bookPage.getBookDTOs().isEmpty())
         {
-            return Response.status(HttpResponseStatus.NOT_FOUND.code()).entity("No books found").build();
+            final Response.ResponseBuilder builder = Response.status(HttpResponseStatus.NOT_FOUND.code());
+            addDefaultLinksByAuthorizationLevel(uriInfo, builder, res);
+            return builder.build();
         }
         final Response.ResponseBuilder builder = Response.ok(bookPage);
-        AuthorizationResult res = checkAuthorizationLevelWithoutId(httpHeaders);
         addDefaultLinksByAuthorizationLevel(uriInfo, builder, res);
         addSelfLinksToBooks(bookPage.getBookDTOs());
         addPaging(page, bookPage, builder, search);
@@ -80,7 +82,7 @@ public class BookWebController extends AbstractController
     public Response updateOrCreateBook(@Positive @PathParam("isbn") long isbn, @Valid BookDTO book)
     {
         final AuthorizationResult res = checkAuthorizationLevelWithoutId(httpHeaders);
-        if(res.getAuthorizationLevel() != AuthorizationLevel.ADMIN)
+        if(res.getAuthorizationLevel() == AuthorizationLevel.ADMIN)
         {
             return Response.status(Response.Status.UNAUTHORIZED).build();
         }

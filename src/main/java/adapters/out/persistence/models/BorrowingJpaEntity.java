@@ -3,7 +3,6 @@ package adapters.out.persistence.models;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "borrowing")
 public class BorrowingJpaEntity
 {
 

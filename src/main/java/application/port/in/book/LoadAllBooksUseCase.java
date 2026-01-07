@@ -4,5 +4,5 @@ import application.domain.results.BooksResult;
 
 public interface LoadAllBooksUseCase
 {
-    BooksResult loadAllBooks();
+    BooksResult loadAllBooks(int page);
 }

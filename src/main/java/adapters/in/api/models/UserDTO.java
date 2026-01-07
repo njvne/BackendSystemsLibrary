@@ -15,11 +15,9 @@ public class UserDTO extends AbstractDataTransferObject
     @NotBlank (message = "User must have a first name")
     private String surname;
     @NotBlank (message = "User must have a phone number")
-    private long phonenumber;
+    private String phonenumber;
     @NotBlank (message = "User must have an email")
     private String email;
-    @NotBlank (message = "User must have a birthday")
-    private Date birthdate;
 
 
     public UserDTO()
@@ -47,12 +45,12 @@ public class UserDTO extends AbstractDataTransferObject
         this.surname = surname;
     }
 
-    public long getPhonenumber()
+    public String getPhonenumber()
     {
         return phonenumber;
     }
 
-    public void setPhonenumber(long phonenumber)
+    public void setPhonenumber(String phonenumber)
     {
         this.phonenumber = phonenumber;
     }
@@ -65,15 +63,5 @@ public class UserDTO extends AbstractDataTransferObject
     public void setEmail(String email)
     {
         this.email = email;
-    }
-
-    public Date getBirthdate()
-    {
-        return birthdate;
-    }
-
-    public void setBirthdate(Date birthdate)
-    {
-        this.birthdate = birthdate;
     }
 }

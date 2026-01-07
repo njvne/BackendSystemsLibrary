@@ -1,16 +1,13 @@
 package application.domain.models;
 
 
-import java.util.Date;
-
 public class Book
 {
     private BookISBN isbn;
     private String title;
     private String author;
     private String description;
-    private Date publicationDate;
-    private int copyAmount;
+    private long copyAmount;
     private int availableAmount;
 
 
@@ -19,6 +16,11 @@ public class Book
     public Book(BookISBN isbn)
     {
         this.isbn = new BookISBN();
+    }
+
+    public Book()
+    {
+
     }
 
 
@@ -52,17 +54,9 @@ public class Book
     this.description = description;
 }
 
-    public Date getPublicationDate() {
-    return publicationDate;
-}
+    public long getCopyAmount() {return copyAmount;}
 
-    public void setPublicationDate(Date publicationDate) {
-    this.publicationDate = publicationDate;
-}
-
-    public int getCopyAmount() {return copyAmount;}
-
-    public void setCopyAmount(int copyAmount) {this.copyAmount = copyAmount;}
+    public void setCopyAmount(long copyAmount) {this.copyAmount = copyAmount;}
 
     public int getAvailableAmount() {return availableAmount;}
 

@@ -2,7 +2,6 @@ package adapters.out.persistence.models;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "bookcopies")
 public class BookCopyJpaEntity
 {
     @Id

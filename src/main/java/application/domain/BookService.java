@@ -14,10 +14,8 @@ import jakarta.inject.Inject;
 
 
 @ApplicationScoped
-public class BookService implements CreateBookUseCase, DeleteBookUseCase, LoadAllBooksUseCase, LoadBooksByFilterUseCase, LoadBookByIdUseCase, UpdateBookUseCase
+public class BookService implements DeleteBookUseCase, LoadAllBooksUseCase, LoadBooksByFilterUseCase, LoadBookByIdUseCase, UpdateBookUseCase
 {
-    @Inject
-    PersistBookPort persistBookPort;
 
     @Inject
     DeleteBookPort deleteBookPort;
@@ -37,21 +35,15 @@ public class BookService implements CreateBookUseCase, DeleteBookUseCase, LoadAl
 
 
     @Override
-    public NoContentResult createBook(Book book, long isbn)
-    {
-        return this.persistBookPort.persistBook(book, new BookISBN(isbn));
-    }
-
-    @Override
     public BookResult loadBookByIsbn(BookISBN isbn)
     {
         return this.readBookByIdPort.loadBookById(isbn);
     }
 
     @Override
-    public BooksResult loadAllBooks()
+    public BooksResult loadAllBooks(int page)
     {
-        return this.readAllBooksPort.loadAllBooks();
+        return this.readAllBooksPort.loadAllBooks(page);
     }
 
     @Override
@@ -61,7 +53,7 @@ public class BookService implements CreateBookUseCase, DeleteBookUseCase, LoadAl
     }
 
     @Override
-    public NoContentResult updateBook(BookISBN isbn, Book book)
+    public NoContentResult updateOrCreateBook(BookISBN isbn, Book book)
     {
         final var result = this.readBookByIdPort.loadBookById(isbn);
         final var returnValue = new NoContentResult();
@@ -75,7 +67,7 @@ public class BookService implements CreateBookUseCase, DeleteBookUseCase, LoadAl
         }
         else
         {
-            this.updateBookPort.updateBook(book);
+            this.updateBookPort.updateOrPersistBook(book, isbn);
         }
         return returnValue;
     }
@@ -100,13 +92,13 @@ public class BookService implements CreateBookUseCase, DeleteBookUseCase, LoadAl
         return returnValue;
     }
 
-    /*@PostConstruct
-    public void populateBooks()
+    @PostConstruct
+    public void populateBook()
     {
-        final var faker = new BookDataFaker();
-        for(long l = 9000000000L; l < 9000010000L; l += (long) Math.ceil(Math.random() * 200))
-        {
-            this.createBook(faker.createModel(), l);
-        }
-    }*/
+        Book nu = new Book(new BookISBN(123456789));
+        nu.setAuthor("amanda");
+        nu.setDescription("This is the description");
+        nu.setTitle("This is the title");
+        this.updateBookPort.updateOrPersistBook(nu, new BookISBN(123456789));
+    }
 }

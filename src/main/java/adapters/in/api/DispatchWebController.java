@@ -1,6 +1,6 @@
 package adapters.in.api;
 
-import adapters.in.api.Authorisation.AuthorizationResult;
+import application.domain.Authorisation.AuthorizationResult;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;

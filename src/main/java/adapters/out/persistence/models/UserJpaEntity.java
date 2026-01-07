@@ -13,14 +13,7 @@ public class UserJpaEntity
     private String surname;
     private long phonenumber;
     private String email;
-
-
-
-    //constructor
-    public UserJpaEntity()
-    {
-
-    }
+    private String password;
 
 
 

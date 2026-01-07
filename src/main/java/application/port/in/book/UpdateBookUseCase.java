@@ -6,5 +6,5 @@ import application.domain.results.NoContentResult;
 
 public interface UpdateBookUseCase
 {
-    NoContentResult updateBook(BookISBN isbn, Book book);
+    NoContentResult updateOrCreateBook(BookISBN isbn, Book book);
 }

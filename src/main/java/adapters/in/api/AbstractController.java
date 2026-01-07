@@ -1,7 +1,7 @@
 package adapters.in.api;
 
-import adapters.in.api.Authorisation.AuthorizationLevel;
-import adapters.in.api.Authorisation.AuthorizationResult;
+import application.domain.Authorisation.AuthorizationLevel;
+import application.domain.Authorisation.AuthorizationResult;
 import adapters.in.api.Exceptions.MissingLoginDataException;
 import adapters.in.api.Exceptions.WrongCredentialsException;
 import adapters.in.api.utils.Hyperlinks;
@@ -34,8 +34,6 @@ public abstract class AbstractController
                     throw new WrongCredentialsException();
                 }
                 return new AuthorizationResult(level, id);
-                //return 2; if admin
-                //throw exception if incorrect credentials
             }
             else
             {
@@ -65,15 +63,13 @@ public abstract class AbstractController
                 AuthorizationLevel level = AuthorizationLevel.USER;
                 int id = 0;
                 return new AuthorizationResult(level, id);
-                //return 2; if admin
-                //throw exception if incorrect credentials
             }
             else
             {
                 throw new MissingLoginDataException();  //branch into not logged in
             }
         }
-        catch(RuntimeException e)     //->"not logged in"
+        catch(Exception e)     //->"not logged in"
         {
             AuthorizationLevel level = AuthorizationLevel.NOT_LOGGED_IN;
             return new AuthorizationResult(level, -1);

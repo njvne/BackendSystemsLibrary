@@ -27,7 +27,9 @@ public abstract class AbstractResult
     }
 
 
-
+    public final void setError() {
+        this.hasError = true;
+    }
 
     public final boolean hasError()
     {
