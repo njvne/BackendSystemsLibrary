@@ -1,5 +1,7 @@
 package adapters.in.api;
 
+import adapters.in.api.adapter.PutStatus;
+import adapters.in.api.models.UserDTO;
 import application.domain.Authorisation.AuthorizationLevel;
 import application.domain.Authorisation.AuthorizationResult;
 import adapters.in.api.adapter.BookServiceAdapter;
@@ -86,19 +88,15 @@ public class BookWebController extends AbstractController
         {
             return Response.status(Response.Status.UNAUTHORIZED).build();
         }
-        try
+        book.setId(isbn);
+        int i = this.bookServiceAdapter.updateBook(isbn, book);
+        Response.ResponseBuilder r = Response.status(i);
+        if(i == PutStatus.CREATED)
         {
-            this.bookServiceAdapter.updateBook(isbn, book);
-            final Response.ResponseBuilder builder = Response.ok();
-            addDefaultLinksByAuthorizationLevel(uriInfo, builder, res);
-            return builder.build();
+            r.header("Location", createLocationHeader(book));
         }
-        catch(NotFoundException e)
-        {
-            final var result = bookServiceAdapter.createNewBook(book, isbn);
-            return Response.status(HttpResponseStatus.CREATED.code()).header("Location", createLocationHeader(result.getBookDTO())).build();
-            //chose not to add links other than the location header in the response. idk if that's cool or not but you get the links again after going to the location.
-        }
+        addDefaultLinksByAuthorizationLevel(uriInfo, r, res);
+        return r.build();
     }
 
 

@@ -19,7 +19,6 @@ public class Mapper
     {
         final var bookDTO = new BookDTO();
         bookDTO.setId(book.getIsbn().getISBN());
-        System.out.println(bookDTO.getId());
         bookDTO.setTitle(book.getTitle());
         bookDTO.setAuthor(book.getAuthor());
         bookDTO.setDescription(book.getDescription());

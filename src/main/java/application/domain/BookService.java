@@ -1,5 +1,6 @@
 package application.domain;
 
+import adapters.in.api.adapter.PutStatus;
 import application.domain.models.Book;
 import application.domain.models.BookISBN;
 import application.domain.results.BookResult;
@@ -11,6 +12,7 @@ import application.port.out.book.*;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.InternalServerErrorException;
 
 
 @ApplicationScoped
@@ -55,21 +57,17 @@ public class BookService implements DeleteBookUseCase, LoadAllBooksUseCase, Load
     @Override
     public NoContentResult updateOrCreateBook(BookISBN isbn, Book book)
     {
-        final var result = this.readBookByIdPort.loadBookById(isbn);
         final var returnValue = new NoContentResult();
-        if(result.isEmpty())
+        final var result = this.updateBookPort.updateOrPersistBook(book, isbn);
+        if(result.getErrorCode() == PutStatus.CREATED || result.getErrorCode() == PutStatus.UPDATED)
         {
-            returnValue.setError(ErrorCodes.RESOURCE_TO_UPDATE_NOT_FOUND, "Book with ISBN '" + isbn.getISBN() + "' not found");
-        }
-        else if (isbn.getISBN() != book.getIsbn().getISBN())
-        {
-            returnValue.setError(ErrorCodes.RESOURCE_ID_DOES_NOT_MATCH, "Book with ISBN '" + isbn.getISBN() + "' does not match given update for " + book.getIsbn().getISBN());
+            return result;
         }
         else
         {
-            this.updateBookPort.updateOrPersistBook(book, isbn);
+            returnValue.setError(result.getErrorCode(), result.getErrorMessage());
+            return returnValue;
         }
-        return returnValue;
     }
 
     @Override

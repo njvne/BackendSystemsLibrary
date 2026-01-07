@@ -25,8 +25,6 @@ public class Mapper
     {
         var book = new Book();
         book.setIsbn(new BookISBN(bookJpa.getIsbn()));
-        System.out.println(bookJpa.getIsbn());
-        System.out.println(book.getIsbn().getISBN());
         book.setAuthor(bookJpa.getAuthor());
         book.setDescription(bookJpa.getDescription());
         book.setTitle(bookJpa.getTitle());

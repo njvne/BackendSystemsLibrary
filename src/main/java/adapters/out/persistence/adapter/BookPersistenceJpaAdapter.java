@@ -1,5 +1,6 @@
 package adapters.out.persistence.adapter;
 
+import adapters.in.api.adapter.PutStatus;
 import adapters.out.persistence.Mapper;
 import adapters.out.persistence.models.BookCopyJpaEntity;
 import adapters.out.persistence.models.BookJpaEntity;
@@ -48,11 +49,12 @@ public class BookPersistenceJpaAdapter implements DeleteBookPort, ReadAllBooksPo
                 {
                     throw new RuntimeException();
                 }
-                //TODO: merge entities and shit
+                //TODO: merge entities and shit WITH RACE CONDITION
+                returnValue.setError(PutStatus.UPDATED, "");
             }
             catch (Exception e)
             {
-                em.getTransaction().begin();                        //transaction because we persist multiple entities (book AND its book copies)
+                //em.getTransaction().begin();                        //transaction because we persist multiple entities (book AND its book copies)
                 book.setIsbn(isbn);
                 final var model = this.mapper.bookToEntity(book);
                 this.em.persist(model);
@@ -62,14 +64,14 @@ public class BookPersistenceJpaAdapter implements DeleteBookPort, ReadAllBooksPo
                     copy.setBook(model);
                     this.em.persist(copy);
                 }
-                em.getTransaction().commit();
+                //em.getTransaction().commit();
+                returnValue.setError(PutStatus.CREATED, "Created");
             }
-
         }
         catch(Exception e)
         {
             returnValue.setError();
-            returnValue.setError(500, "Could not persist book");
+            returnValue.setError(PutStatus.ERROR, "Could not update or create book");
         }
         return returnValue;
     }

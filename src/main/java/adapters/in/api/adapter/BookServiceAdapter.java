@@ -10,6 +10,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
+import org.apache.commons.collections4.Put;
 
 @ApplicationScoped
 public class BookServiceAdapter
@@ -96,24 +97,16 @@ public class BookServiceAdapter
         }
     }
 
-    public void updateBook(long isbn, BookDTO bookModel)
+    public int updateBook(long isbn, BookDTO bookModel)
     {
         final var domainBook = this.mapper.bookDTOToDomainModel(bookModel);
         final var domainResult = this.updateBookUseCase.updateOrCreateBook(new BookISBN(isbn), domainBook);
         if(domainResult.hasError())
         {
-            if(domainResult.getErrorCode() == ErrorCodes.RESOURCE_TO_UPDATE_NOT_FOUND)
-            {
-                throw new NotFoundException(domainResult.getErrorMessage());
-            }
-            if(domainResult.getErrorCode() == ErrorCodes.RESOURCE_ID_DOES_NOT_MATCH)
-            {
-                throw new IllegalUpdateException(domainResult.getErrorMessage());
-            }
-            if(domainResult.getErrorCode() == ErrorCodes.RESOURCE_CONFLICT)
-            {
-                throw new ResourceConflictException(domainResult.getErrorMessage());
-            }
+            return domainResult.getErrorCode();
+        }
+        else    //using result error codes to determine created or updated, therefor not having an error code means something went wrong
+        {
             throw new InternalServerErrorException(domainResult.getErrorMessage());
         }
     }
