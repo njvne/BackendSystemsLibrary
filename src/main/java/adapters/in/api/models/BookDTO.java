@@ -1,6 +1,7 @@
 package adapters.in.api.models;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.xml.bind.annotation.XmlRootElement;
 
@@ -13,9 +14,9 @@ public class BookDTO extends AbstractDataTransferObject
     private String author;
     @NotBlank (message = "Book must have a description")
     private String description;
-    @DefaultValue("1")
+    @DefaultValue("1") @PositiveOrZero
     private long copyAmount;
-    @DefaultValue("1")
+    @DefaultValue("1") @PositiveOrZero
     private int availableAmount;
 
 

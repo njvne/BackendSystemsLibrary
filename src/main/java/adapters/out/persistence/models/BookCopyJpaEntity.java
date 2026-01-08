@@ -1,5 +1,6 @@
 package adapters.out.persistence.models;
 import jakarta.persistence.*;
+import jakarta.ws.rs.DefaultValue;
 
 @Entity
 public class BookCopyJpaEntity
@@ -8,6 +9,17 @@ public class BookCopyJpaEntity
     @GeneratedValue(strategy= GenerationType.AUTO) @Column(name = "copyid") private long copyid;
 
     @ManyToOne(fetch = FetchType.EAGER) @JoinColumn(nullable = false, name = "isbn") private BookJpaEntity book;
+
+    public boolean isRetired() {
+        return isRetired;
+    }
+
+    public void setRetired(boolean retired) {
+        isRetired = retired;
+    }
+
+    @DefaultValue("false")
+    private boolean isRetired;
 
 
 

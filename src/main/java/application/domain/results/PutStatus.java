@@ -1,4 +1,4 @@
-package adapters.in.api.adapter;
+package application.domain.results;
 
 public interface PutStatus
 {

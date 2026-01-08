@@ -8,4 +8,5 @@ public interface ErrorCodes     //CONSIDER WRITING THIS AS ENUM
     int RESOURCE_CONFLICT = 409;
     int RESOURCE_NOT_FOUND = 404;
     int RESOURCE_UNAVAILABLE = 404;
+    int IMPOSSIBLE_UPDATE = 422;
 }

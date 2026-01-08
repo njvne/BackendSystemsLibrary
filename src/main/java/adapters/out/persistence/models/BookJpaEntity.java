@@ -1,11 +1,11 @@
 package adapters.out.persistence.models;
 import jakarta.persistence.*;
 
-import java.util.Date;
+import java.io.Serializable;
 
 
 @Entity
-public class BookJpaEntity
+public class BookJpaEntity implements Serializable
 {
     @Id private long isbn;
     private String title;

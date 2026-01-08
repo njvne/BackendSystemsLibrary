@@ -1,7 +1,6 @@
 package adapters.in.api;
 
-import adapters.in.api.adapter.PutStatus;
-import adapters.in.api.models.UserDTO;
+import application.domain.results.PutStatus;
 import application.domain.Authorisation.AuthorizationLevel;
 import application.domain.Authorisation.AuthorizationResult;
 import adapters.in.api.adapter.BookServiceAdapter;
@@ -128,24 +127,18 @@ public class BookWebController extends AbstractController
     public void addPaging(@DefaultValue("1") @PositiveOrZero int page, BooksResult bookPage, Response.ResponseBuilder builder, String query)
     {
         final String path = query.trim().isEmpty() ? "/library/books?page=" : "/library/books?search=" + query + "&page=";
-        if (page == 1)
+        if (bookPage.getBookDTOs().size() == 21)
         {
             Hyperlinks.addLink(uriInfo, builder, path + (page + 1), "next", MediaType.APPLICATION_JSON);
+            bookPage.getBookDTOs().removeLast();
         }
-        else if(bookPage.getBookDTOs().size() < 21)                             //how to not hardcode server-set size of pages??
-        {                                                                       //load 21 books, send only 20 to ensure there is a next page
-            if(page > 1)
-            {
-                Hyperlinks.addLink(uriInfo, builder, path + (page - 1), "prev", MediaType.APPLICATION_JSON);
-            }
-        }
-        else
+        if(page > 1)
         {
             Hyperlinks.addLink(uriInfo, builder, path + (page - 1), "prev", MediaType.APPLICATION_JSON);
-            Hyperlinks.addLink(uriInfo, builder, path + (page + 1), "next", MediaType.APPLICATION_JSON);
         }
-        bookPage.getBookDTOs().removeLast();    //get 21 to check wether there is a next element but send only 20
+
     }
+
 
     public void addSelfLinksToBooks(List<BookDTO> books)
     {

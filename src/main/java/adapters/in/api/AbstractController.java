@@ -9,6 +9,9 @@ import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Base64;
 
@@ -121,7 +124,6 @@ public abstract class AbstractController
 
 
 
-
     public String[] getUsernameAndPasswordAsArray(HttpHeaders httpHeaders)
     {
         final String authHeader = httpHeaders.getRequestHeader("Authorization").getFirst();
@@ -129,7 +131,15 @@ public abstract class AbstractController
         {
             final String withoutBasic = authHeader.replaceFirst("(?i)basic ", "");
             final String userColonPass = decodeAsString(withoutBasic);
-            return userColonPass.split(":", 2);
+            String[] res = userColonPass.split(":", 2);
+            try{
+                MessageDigest digest = MessageDigest.getInstance("SHA-256");                //hashing on server side
+                res[1] = Arrays.toString(digest.digest(res[1].getBytes(StandardCharsets.UTF_8)));
+            }
+            catch (NoSuchAlgorithmException e)
+            {
+                return new String[2];
+            }
         }
         return new String[2];
     }

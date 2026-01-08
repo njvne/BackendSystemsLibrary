@@ -1,6 +1,6 @@
 package application.domain;
 
-import adapters.in.api.adapter.PutStatus;
+import application.domain.results.PutStatus;
 import application.domain.models.Book;
 import application.domain.models.BookISBN;
 import application.domain.results.BookResult;
@@ -12,7 +12,6 @@ import application.port.out.book.*;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.InternalServerErrorException;
 
 
 @ApplicationScoped
@@ -73,21 +72,17 @@ public class BookService implements DeleteBookUseCase, LoadAllBooksUseCase, Load
     @Override
     public NoContentResult deleteBook(BookISBN ISBN)
     {
-        final var result =  this.readBookByIdPort.loadBookById(ISBN);
+        final var result =  this.deleteBookPort.deleteBook(ISBN);
         final var returnValue = new NoContentResult();
-        if(result.isEmpty())
-        {
-            returnValue.setError(ErrorCodes.RESOURCE_TO_DELETE_NOT_FOUND, "Book with ISBN '" + ISBN);
-        }
         if(result.hasError())
         {
             returnValue.setError(result.getErrorCode(), result.getErrorMessage());
+            return returnValue;
         }
         else
         {
-            this.deleteBookPort.deleteBook(ISBN);
+            return result;
         }
-        return returnValue;
     }
 
     @PostConstruct
@@ -97,6 +92,7 @@ public class BookService implements DeleteBookUseCase, LoadAllBooksUseCase, Load
         nu.setAuthor("amanda");
         nu.setDescription("This is the description");
         nu.setTitle("This is the title");
+        nu.setCopyAmount(2);
         this.updateBookPort.updateOrPersistBook(nu, new BookISBN(123456789));
     }
 }

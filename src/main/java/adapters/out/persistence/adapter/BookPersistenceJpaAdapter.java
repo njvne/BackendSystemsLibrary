@@ -1,6 +1,6 @@
 package adapters.out.persistence.adapter;
 
-import adapters.in.api.adapter.PutStatus;
+import application.domain.results.PutStatus;
 import adapters.out.persistence.Mapper;
 import adapters.out.persistence.models.BookCopyJpaEntity;
 import adapters.out.persistence.models.BookJpaEntity;
@@ -14,11 +14,12 @@ import application.port.out.book.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 import jakarta.persistence.NoResultException;
-import jakarta.persistence.criteria.Root;
+import jakarta.persistence.TypedQuery;
 import jakarta.transaction.Transactional;
 
-import java.util.ArrayList;
+import java.util.List;
 
 
 @ApplicationScoped
@@ -29,10 +30,21 @@ public class BookPersistenceJpaAdapter implements DeleteBookPort, ReadAllBooksPo
 
     private final Mapper mapper = new Mapper();
 
+
+
+    @Transactional
     @Override
     public NoContentResult deleteBook(BookISBN bookISBN)
     {
-        return null;
+        BookJpaEntity toDelete = this.em.find(BookJpaEntity.class, bookISBN.getISBN());
+        if(toDelete == null)
+        {
+            final var res = new NoContentResult();
+            res.setError(ErrorCodes.RESOURCE_NOT_FOUND, "Book to delete not found");
+            return res;
+        }
+        this.em.remove(toDelete);
+        return new NoContentResult();
     }
 
     @Transactional
@@ -44,19 +56,54 @@ public class BookPersistenceJpaAdapter implements DeleteBookPort, ReadAllBooksPo
         {
             try
             {
-                final var res = loadBookById(isbn);
-                if(res.getErrorCode() == ErrorCodes.RESOURCE_NOT_FOUND)
+                BookJpaEntity res = this.em.find(BookJpaEntity.class, isbn.getISBN());
+                if(res == null)
                 {
-                    throw new RuntimeException();
+                    throw new NoResultException();
                 }
-                //TODO: merge entities and shit WITH RACE CONDITION
+                final var bookEntity = this.mapper.bookToEntity(book);
+                long toBe = book.getCopyAmount();
+                long currCopyAmount = addAmountOfCopies(this.mapper.bookToDomain(res));
+                if(currCopyAmount != toBe)
+                {
+                    if(toBe < currCopyAmount)
+                    {
+                        TypedQuery<BookCopyJpaEntity> queue = em.createQuery(
+                                "FROM BookCopyJpaEntity bc LEFT JOIN BorrowingJpaEntity b ON b.bookcopy = bc AND b.isactive = false WHERE bc.book = :book AND bc.isRetired = false"
+                                , BookCopyJpaEntity.class);
+                        queue.setParameter("book", res);
+                        final var nonBorrowedBooks = queue.getResultList();
+                        System.out.println("queue size: " + nonBorrowedBooks.size());
+                        /*if(currCopyAmount > nonBorrowedBooks.size()) {throw new IllegalArgumentException();}*/
+                        while(toBe < currCopyAmount)
+                        {
+                            nonBorrowedBooks.getFirst().setRetired(true);
+                            nonBorrowedBooks.removeFirst();
+                            currCopyAmount--;
+                        }
+                    }
+                    while(book.getCopyAmount() > currCopyAmount)
+                    {
+                        final var copy = new BookCopyJpaEntity();
+                        copy.setBook(res);
+                        this.em.persist(copy);
+                        currCopyAmount++;
+                    }
+                }
+                this.em.lock(res, LockModeType.PESSIMISTIC_WRITE);
+                res.setAuthor(bookEntity.getAuthor());
+                res.setTitle(bookEntity.getTitle());
+                res.setDescription(bookEntity.getDescription());
+                this.em.lock(res, LockModeType.NONE);
+                this.em.flush();
                 returnValue.setError(PutStatus.UPDATED, "");
             }
-            catch (Exception e)
+            catch (NoResultException e)
             {
-                //em.getTransaction().begin();                        //transaction because we persist multiple entities (book AND its book copies)
+                //em.getTransaction().begin();                        //transaction because we persist multiple entities (book AND its book copies). crashes the code tho
                 book.setIsbn(isbn);
                 final var model = this.mapper.bookToEntity(book);
+                model.setIsbn(isbn.getISBN());
                 this.em.persist(model);
                 for(int i = 0; i < book.getCopyAmount(); i++)
                 {
@@ -70,8 +117,8 @@ public class BookPersistenceJpaAdapter implements DeleteBookPort, ReadAllBooksPo
         }
         catch(Exception e)
         {
-            returnValue.setError();
-            returnValue.setError(PutStatus.ERROR, "Could not update or create book");
+            System.out.println(e.getMessage());
+            returnValue.setError(ErrorCodes.IMPOSSIBLE_UPDATE, "Error Updating Book, likely couldn't remove book because all are borrowed.");
         }
         return returnValue;
     }
@@ -86,14 +133,7 @@ public class BookPersistenceJpaAdapter implements DeleteBookPort, ReadAllBooksPo
            final var root = criteriaQuery.from(BookJpaEntity.class);
            criteriaQuery.select(root);
            final var results = em.createQuery(criteriaQuery).setFirstResult((page - 1) * 20).setMaxResults((page - 1) * 20 + 21).getResultList();
-           final var tempres = this.mapper.booksToDomainModels(results);
-           final var domainres = new ArrayList<Book>();
-           for(Book book : tempres)
-           {
-               book = addAmountOfCopies(book);
-               domainres.add(book);
-           }
-           return new BooksResult(domainres);
+           return new BooksResult(addAmountOfCopiesToList(results));
         }
         catch(NoResultException e)
         {
@@ -110,9 +150,13 @@ public class BookPersistenceJpaAdapter implements DeleteBookPort, ReadAllBooksPo
         try
         {
             BookJpaEntity res = this.em.find(BookJpaEntity.class, isbn.getISBN());
-            if(res == null){throw new NoResultException();}
-            final var book = addAmountOfCopies(this.mapper.bookToDomain(res));
-            return new BookResult(book);
+            if(res == null)
+            {
+                throw new NoResultException();
+            }
+            final var result = this.mapper.bookToDomain(res);
+            addAmountOfCopies(result);
+            return new BookResult(result);
         }
         catch(NoResultException e)
         {
@@ -126,18 +170,52 @@ public class BookPersistenceJpaAdapter implements DeleteBookPort, ReadAllBooksPo
     @Override
     public BooksResult loadBookByFilter(int page, String query)
     {
-        return null;
+        try
+        {
+            //SQL injects :c#
+            TypedQuery<BookJpaEntity> queue = em.createQuery(
+                    "FROM BookJpaEntity book WHERE book.title LIKE :query OR book.author LIKE :query OR book.description LIKE :query"
+                    , BookJpaEntity.class);
+            queue.setParameter("query", "%" + query + "%");
+            queue.setFirstResult((page - 1) * 20);
+            queue.setMaxResults((page - 1) * 20 + 21);
+            final var res = queue.getResultList();
+            if(res == null)
+            {
+                throw new NoResultException();
+            }
+            return new BooksResult(addAmountOfCopiesToList(res));
+        }
+        catch(NoResultException e)
+        {
+            BooksResult bookResult = new BooksResult();
+            bookResult.setError();
+            bookResult.setError(ErrorCodes.RESOURCE_NOT_FOUND, "Not Found");
+            return bookResult;
+        }
     }
 
-    
-    public Book addAmountOfCopies(Book book)
+
+
+
+    private List<Book> addAmountOfCopiesToList(List<BookJpaEntity> bookJpaEntityList)
     {
-        final var criteriaBuilder2 = em.getCriteriaBuilder();
-        final var criteriaQuery2 = criteriaBuilder2.createQuery(long.class);
-        Root<BookCopyJpaEntity> bookRoot = criteriaQuery2.from(BookCopyJpaEntity.class);
-        criteriaQuery2.select(criteriaBuilder2.count(criteriaBuilder2.equal(bookRoot.get("book"), this.mapper.bookToEntity(book))));
-        book.setCopyAmount((em.createQuery(criteriaQuery2).getSingleResult()));
+        final var domainmodels = this.mapper.booksToDomainModels(bookJpaEntityList);
+        for(Book book : domainmodels)
+        {
+            addAmountOfCopies(book);
+        }
+        return domainmodels;
+    }
+
+
+    private int addAmountOfCopies(Book book)
+    {
+        TypedQuery<BookCopyJpaEntity> queue = em.createQuery("FROM BookCopyJpaEntity bc WHERE bc.book = :book AND isRetired = false", BookCopyJpaEntity.class);
+        queue.setParameter("book", this.mapper.bookToEntity(book));
+        int i = queue.getResultList().size();
+        book.setCopyAmount(i);
         book.setAvailableAmount(1); //TODO
-        return book;
+        return i;
     }
 }

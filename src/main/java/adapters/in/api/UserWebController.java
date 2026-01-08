@@ -3,14 +3,11 @@ package adapters.in.api;
 import application.domain.Authorisation.AuthorizationLevel;
 import application.domain.Authorisation.AuthorizationResult;
 import adapters.in.api.models.UserDTO;
-import com.sun.tools.rngom.util.Uri;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.validation.Validator;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.Size;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
 
