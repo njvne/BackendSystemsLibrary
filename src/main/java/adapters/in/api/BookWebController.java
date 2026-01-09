@@ -57,7 +57,8 @@ public class BookWebController extends AbstractController
     @Produces({MediaType.APPLICATION_JSON})
     public Response getById(@Positive @PathParam("isbn") long isbn)
     {
-        final var book = this.bookServiceAdapter.loadBookById(isbn);
+        final var book = this.bookServiceAdapter.loadBookById(isbn).getBookDTO();
+        addSelfLinkToBook(book);
         final Response.ResponseBuilder builder = Response.ok(book);
         final AuthorizationResult res = checkAuthorizationLevelWithoutId(httpHeaders);
         if(res.getAuthorizationLevel() == AuthorizationLevel.ADMIN)
@@ -67,10 +68,10 @@ public class BookWebController extends AbstractController
         }
         else if(res.getAuthorizationLevel() == AuthorizationLevel.USER)
         {
-            //if(result.getAvailAmount > 0)
-            //{
-            Hyperlinks.addLink(uriInfo, builder, "/library/users/" + res.getRelatedUserID() + "borrow/" + isbn, "BorrowBook", MediaType.APPLICATION_JSON);
-            //}
+            if(book.getAvailAmount() > 0)
+            {
+                Hyperlinks.addLink(uriInfo, builder, "/library/users/" + res.getRelatedUserID() + "borrow/" + isbn, "BorrowBook", MediaType.APPLICATION_JSON);
+            }
         }
         addDefaultLinksByAuthorizationLevel(uriInfo, builder, res);
         return builder.build();
@@ -138,7 +139,6 @@ public class BookWebController extends AbstractController
         }
 
     }
-
 
     public void addSelfLinksToBooks(List<BookDTO> books)
     {

@@ -5,5 +5,5 @@ import application.domain.results.NoContentResult;
 
 public interface CreateUserUseCase
 {
-    NoContentResult create(User user);
+    NoContentResult create(User user, String password);
 }

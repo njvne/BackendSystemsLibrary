@@ -13,6 +13,8 @@ public class Borrow
     //constructor
     public Borrow() {}
 
+    public Borrow(BookISBN isbn, UserID userid, boolean returned) {}
+
 
 
     //getters and setters
@@ -23,10 +25,6 @@ public class Borrow
     public UserID getUserid() { return userid; }
 
     public void setUserid(UserID userid) { this.userid = userid; }
-
-    public Date getBorrowdate() { return borrowdate; }
-
-    public void setBorrowdate(Date borrowdate) { this.borrowdate = borrowdate; }
 
     public boolean isReturned() { return returned; }
 

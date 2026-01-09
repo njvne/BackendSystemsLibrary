@@ -5,5 +5,5 @@ import application.domain.results.NoContentResult;
 
 public interface PersistUserPort
 {
-    NoContentResult createUser(User user);
+    NoContentResult createUser(User user, String hashedPassword);
 }

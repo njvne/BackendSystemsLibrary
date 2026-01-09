@@ -1,5 +1,9 @@
 package adapters.in.api;
 
+import adapters.in.api.adapter.UserServiceAdapter;
+import adapters.in.api.models.AbstractDataTransferObject;
+import adapters.in.api.models.BookDTO;
+import adapters.in.api.models.BorrowDTO;
 import application.domain.Authorisation.AuthorizationLevel;
 import application.domain.Authorisation.AuthorizationResult;
 import adapters.in.api.models.UserDTO;
@@ -11,10 +15,15 @@ import jakarta.validation.constraints.Positive;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
 
+import java.util.List;
+
 @Path("/library/users")
 public class UserWebController extends AbstractController
 {
     //borrows are a subresource 1:n -> implement hyperlinks for them under /user/{userid}/borrows
+
+    @Inject
+    UserServiceAdapter userServiceAdapter;
 
     @Inject
     private Validator validator;
@@ -38,13 +47,15 @@ public class UserWebController extends AbstractController
             addDefaultNotLoggedInHeaders(uriInfo, builder);
             return builder.build();
         }
-        //todo: create user. if successful, do the below, if not, fail ig
-        return Response.status(HttpResponseStatus.CREATED.code()).header("Location", createLocationHeader(new UserDTO()) + "/" + 0).build();
-                                                                                            //todo: CHANGE DTO TO RESULT AND 0 TO NEW USERID
+        final var result = this.userServiceAdapter.createUser(userDTO, pass);
+        final Response.ResponseBuilder builder = Response.status(Response.Status.CREATED).header("Location", createLocationHeader(result.getUserDTO()));
+        addDefaultUserHeaders(uriInfo, builder, result.getUserDTO().getId());
+        return builder.build();
     }
 
 
     @GET
+    @Produces({MediaType.APPLICATION_JSON})
     @Path("/{uid}")
     public Response getUserInfo(@Positive @PathParam("uid") long uid)
     {
@@ -53,14 +64,16 @@ public class UserWebController extends AbstractController
         {
             return Response.status(Response.Status.UNAUTHORIZED).build();
         }
-        //todo: getuserbyId
-        final Response.ResponseBuilder builder = Response.status(/*CHANGE TO RESULT*/Response.Status.OK);
+        final var result = this.userServiceAdapter.getUserById(uid);
+        final Response.ResponseBuilder builder = Response.ok(result);
+        addSelfLinkToDTO(result.getUserDTO());
         addDefaultLinksByAuthorizationLevel(uriInfo, builder, res);
-        return Response.ok().build();
+        return builder.build();
     }
 
 
     @GET
+    @Produces({MediaType.APPLICATION_JSON})
     @Path("/{uid}/borrows")
     public Response getUserBorrows(@Positive @PathParam("uid") long uid)
     {
@@ -69,14 +82,16 @@ public class UserWebController extends AbstractController
         {
             return Response.status(Response.Status.UNAUTHORIZED).build();
         }
-        //todo
-        final Response.ResponseBuilder builder = Response.status(/*CHANGE TO RESULT*/Response.Status.OK);
+        final var result = this.userServiceAdapter.getAllBorrows(uid);
+        final Response.ResponseBuilder builder = Response.ok(result);
+        addSelfLinksToDTOs(result.getBorrowDTOs());
         addDefaultLinksByAuthorizationLevel(uriInfo, builder, res);
-        return Response.ok().build();
+        return builder.build();
     }
 
 
     @GET
+    @Produces({MediaType.APPLICATION_JSON})
     @Path("/{uid}/borrows/{borrowNum}")
     public Response getSingleUserBorrow(@Positive @PathParam("uid") long uid, @Positive @PathParam("borrowNum") long borrowNum)
     {
@@ -85,14 +100,16 @@ public class UserWebController extends AbstractController
         {
             return Response.status(Response.Status.UNAUTHORIZED).build();
         }
-        final Response.ResponseBuilder builder = Response.status(/*CHANGE TO RESULT*/Response.Status.OK);
+        final var result = this.userServiceAdapter.getBorrowByNumber(uid, borrowNum);
+        final Response.ResponseBuilder builder = Response.ok(result);
+        addSelfLinkToDTO(result.getBorrow());
         addDefaultLinksByAuthorizationLevel(uriInfo, builder, res);
-        return Response.ok().build();
+        return builder.build();
     }
 
 
     @POST
-    @Path("/{uid}/borrows/book/{isbn}")
+    @Path("/{uid}/borrows/{isbn}")
     public Response borrowBook(@Positive @PathParam("uid") long uid, @Positive @PathParam("isbn") long isbn)
     {
         final AuthorizationResult res = checkAuthorizationLevel(httpHeaders, uid);
@@ -100,9 +117,11 @@ public class UserWebController extends AbstractController
         {
             return Response.status(Response.Status.UNAUTHORIZED).build();
         }
-        final Response.ResponseBuilder builder = Response.status(/*CHANGE TO RESULT*/Response.Status.OK);
+        final var result = this.userServiceAdapter.createBorrow(uid, isbn);
+        final Response.ResponseBuilder builder = Response.status(Response.Status.CREATED).header("Location", createBorrowLocationHeader(result.getBorrow()));
+        addSelfLinkToDTO(result.getBorrow());
         addDefaultLinksByAuthorizationLevel(uriInfo, builder, res);
-        return Response.ok().build();
+        return builder.build();
     }
     //since I plan to include selflinks to the books in the list of reservations,
     //I don't see a reason to include search by SurrogateKey for reservations. Maybe by exact date or order by date or whatever as use case
@@ -117,14 +136,36 @@ public class UserWebController extends AbstractController
         {
             return Response.status(Response.Status.UNAUTHORIZED).build();
         }
-        final Response.ResponseBuilder builder = Response.status(/*CHANGE TO RESULT*/Response.Status.OK);
+        this.userServiceAdapter.returnBook(uid, borrowNum);
+        final Response.ResponseBuilder builder = Response.noContent();
         addDefaultLinksByAuthorizationLevel(uriInfo, builder, res);
-        return Response.ok().build();
+        return builder.build();
     }
 
     
     private String createLocationHeader(UserDTO model)
     {
         return uriInfo.getRequestUriBuilder().path(Long.toString(model.getId())).build().toString();
+    }
+
+    private String createBorrowLocationHeader(BorrowDTO model)
+    {
+        return uriInfo.getRequestUriBuilder().path(Long.toString(model.getId())).build().toString();
+    }
+
+    public void addSelfLinksToDTOs(List<? extends AbstractDataTransferObject> DTO)
+    {
+        DTO.forEach(this::addSelfLinkToDTO);
+    }
+
+    public void addSelfLinkToDTO(AbstractDataTransferObject dto)
+    {
+        final var currentUri = uriInfo.getAbsolutePath();
+        final var path = currentUri.getPath();
+        final var newPath = path.replaceFirst("/\\d*$", "");
+        final var newUri = UriBuilder.fromUri(currentUri).replacePath(newPath + "/" + dto.getId()).build();
+        dto.getSelfLink().setHref(newUri.toASCIIString());
+        dto.getSelfLink().setRel("self");
+        dto.getSelfLink().setType(httpHeaders.getHeaderString("Accept"));
     }
 }

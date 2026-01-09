@@ -7,7 +7,7 @@ public class UserJpaEntity
 {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
-    private int userid;
+    private long userid;
 
     private String name;
     private String surname;
@@ -18,9 +18,9 @@ public class UserJpaEntity
 
 
     //getters and setters
-    public int getUserid() { return userid; }
+    public long getUserid() { return userid; }
 
-    public void setUserid(int userid) { this.userid = userid; }
+    public void setUserid(long userid) { this.userid = userid; }
 
     public String getName() { return name; }
 

@@ -3,6 +3,9 @@ package adapters.in.api.adapter;
 import adapters.in.api.Exceptions.ResourceConflictException;
 import adapters.in.api.models.BorrowDTO;
 import adapters.in.api.models.UserDTO;
+import application.domain.models.BookISBN;
+import application.domain.models.Borrow;
+import application.domain.models.UserID;
 import application.domain.results.ErrorCodes;
 import application.domain.results.NoContentResult;
 import application.port.in.user.*;
@@ -36,9 +39,10 @@ public class UserServiceAdapter
     private Mapper mapper;
 
 
-    public BorrowResult createBorrow(BorrowDTO borrowDTO)
+    public BorrowResult createBorrow(long uid, long isbn)
     {
-        final var domainResult = this.createBorrowUseCase.create(this.mapper.borrowDTOToDomainModel(borrowDTO));
+        final var domainModel = new Borrow(new BookISBN(isbn), new UserID(uid), false);
+        final var domainResult = this.createBorrowUseCase.create(domainModel);
         if(domainResult.hasError())
         {
             if(domainResult.getErrorCode() == ErrorCodes.RESOURCE_UNAVAILABLE)
@@ -52,20 +56,21 @@ public class UserServiceAdapter
         }
         else
         {
-            return new BorrowResult(borrowDTO);
+            return new BorrowResult(this.mapper.borrowToApiModel(domainModel));
         }
     }
 
-    public UserResult createUser(UserDTO userDTO)
+    public UserResult createUser(UserDTO userDTO, String password)
     {
-        final var domainResult = this.createUserUseCase.create(this.mapper.userToDomainModel(userDTO));
+        final var domainModel = this.mapper.userToDomainModel(userDTO);
+        final var domainResult = this.createUserUseCase.create(domainModel, password);
         if(domainResult.hasError())
         {
             throw new InternalServerErrorException(domainResult.getErrorMessage());
         }
         else
         {
-            return new UserResult(userDTO);
+            return new UserResult(this.mapper.userToApiModel(domainModel));
         }
     }
 
@@ -88,16 +93,14 @@ public class UserServiceAdapter
 
         if(domainResult.isEmpty())
         {
-            throw new NotFoundException( );
+            throw new NotFoundException();
         }
-        else if ( domainResult.hasError( ) )
+        if (domainResult.hasError())
         {
-            throw new InternalServerErrorException( domainResult.getErrorMessage( ) );
+            throw new InternalServerErrorException(domainResult.getErrorMessage());
         }
-        else
-        {
-            return new BorrowResult(this.mapper.borrowToApiModel(domainResult.getResult()));
-        }
+
+        return new BorrowResult(this.mapper.borrowToApiModel(domainResult.getResult()));
     }
 
     public UserResult getUserById(long id)
@@ -108,14 +111,12 @@ public class UserServiceAdapter
         {
             throw new NotFoundException();
         }
-        else if(domainResult.hasError())
+        if(domainResult.hasError())
         {
             throw new InternalServerErrorException(domainResult.getErrorMessage());
         }
-        else
-        {
-            return new UserResult( this.mapper.userToApiModel(domainResult.getResult()));
-        }
+
+        return new UserResult( this.mapper.userToApiModel(domainResult.getResult()));
     }
 
     public void returnBook(long uid, long borrowNum)
@@ -126,10 +127,6 @@ public class UserServiceAdapter
             if(domainResult.getErrorCode() == ErrorCodes.RESOURCE_TO_UPDATE_NOT_FOUND)
             {
                 throw new NotFoundException(domainResult.getErrorMessage());
-            }
-            if(domainResult.getErrorCode() == ErrorCodes.RESOURCE_CONFLICT)
-            {
-                throw new ResourceConflictException(domainResult.getErrorMessage());
             }
             else
             {

@@ -1,11 +1,10 @@
 package application.domain;
 
+import application.domain.models.BookISBN;
 import application.domain.models.Borrow;
 import application.domain.models.User;
-import application.domain.results.BorrowResult;
-import application.domain.results.BorrowsResult;
-import application.domain.results.NoContentResult;
-import application.domain.results.UserResult;
+import application.domain.models.UserID;
+import application.domain.results.*;
 import application.port.in.user.*;
 import application.port.out.user.*;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -41,9 +40,9 @@ public class UserService implements CreateBorrowUseCase, CreateUserUseCase, Load
     }
 
     @Override
-    public NoContentResult create(User user)
+    public NoContentResult create(User user, String password)
     {
-        return this.persistUserPort.createUser(user);
+        return this.persistUserPort.createUser(user, password);
     }
 
     @Override
@@ -67,6 +66,25 @@ public class UserService implements CreateBorrowUseCase, CreateUserUseCase, Load
     @Override
     public NoContentResult returnBook(long uid, long borrowNumber)
     {
-        return this.returnBookUseCase.returnBook(uid, borrowNumber);
+        final var result = this.readBorrowByNumberPort.readBorrowByNumber(uid, borrowNumber);
+        final var returnValue = new NoContentResult();
+
+        if( result.isEmpty() )
+        {
+            returnValue.setError(ErrorCodes.RESOURCE_TO_UPDATE_NOT_FOUND, "path id: " + uid);
+        }
+        else if(result.getResult().getUserid().getId() != uid)
+        {
+            returnValue.setError(ErrorCodes.RESOURCE_ID_DOES_NOT_MATCH, "path id: " + uid + " , resource id: " + borrowNumber);
+        }
+        else if(result.hasError())
+        {
+            returnValue.setError(result.getErrorCode(), result.getErrorMessage());
+        }
+        else
+        {
+            this.returnBookUseCase.returnBook(uid, borrowNumber);
+        }
+        return returnValue;
     }
 }

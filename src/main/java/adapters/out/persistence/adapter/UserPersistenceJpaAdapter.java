@@ -1,5 +1,8 @@
 package adapters.out.persistence.adapter;
 
+import adapters.out.persistence.Mapper;
+import adapters.out.persistence.models.UserAuthJpaEntity;
+import application.domain.Authorisation.AuthorizationLevel;
 import application.domain.models.Borrow;
 import application.domain.models.User;
 import application.domain.results.BorrowResult;
@@ -17,9 +20,14 @@ public class UserPersistenceJpaAdapter implements PersistUserPort, ReadUserByIdP
     @Inject
     private EntityManager em;
 
+    private Mapper mapper;
+
     @Override
-    public NoContentResult createUser(User user)
+    public NoContentResult createUser(User user, String hashedPass)
     {
+        final var entitymodel = this.mapper.userToEntity(user);
+        this.em.persist(entitymodel);
+        UserAuthJpaEntity auth = new UserAuthJpaEntity(entitymodel, hashedPass, AuthorizationLevel.USER);
         return null;
     }
 
