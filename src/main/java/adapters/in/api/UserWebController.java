@@ -20,8 +20,6 @@ import java.util.List;
 @Path("/library/users")
 public class UserWebController extends AbstractController
 {
-    //borrows are a subresource 1:n -> implement hyperlinks for them under /user/{userid}/borrows
-
     @Inject
     UserServiceAdapter userServiceAdapter;
 
@@ -41,7 +39,7 @@ public class UserWebController extends AbstractController
     {
         String[] temp = getUsernameAndPasswordAsArray(httpHeaders);
         String pass = temp[1];
-        if(pass.length() <= 8 || pass.length() > 25)
+        if(pass == null || pass.equals(shortorlongpass))
         {
             final Response.ResponseBuilder builder = Response.status(Response.Status.BAD_REQUEST).entity("Password must be between 8 and 25 characters.");
             addDefaultNotLoggedInHeaders(uriInfo, builder);
@@ -67,7 +65,7 @@ public class UserWebController extends AbstractController
         final var result = this.userServiceAdapter.getUserById(uid);
         final Response.ResponseBuilder builder = Response.ok(result);
         addSelfLinkToDTO(result.getUserDTO());
-        addDefaultLinksByAuthorizationLevel(uriInfo, builder, res);
+        //addDefaultLinksByAuthorizationLevel(uriInfo, builder, res);
         return builder.build();
     }
 

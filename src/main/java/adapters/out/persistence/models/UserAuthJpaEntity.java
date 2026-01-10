@@ -6,6 +6,7 @@ import jakarta.ws.rs.DefaultValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Entity
 public class UserAuthJpaEntity
 {
     private static final Logger LOG = LoggerFactory.getLogger(UserAuthJpaEntity.class);
@@ -13,20 +14,20 @@ public class UserAuthJpaEntity
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
 
-    @OneToOne @JoinColumn(nullable = false, name = "user")
+    @OneToOne @JoinColumn(nullable = false, name = "relateduser")
     private UserJpaEntity user;
 
     @Column(nullable = false)
-    private String hashedPassword;
+    private String hashedpass;
 
     @DefaultValue("User")
     private AuthorizationLevel authorizationLevel;
 
 
-    public UserAuthJpaEntity(UserJpaEntity user, String hashedPassword, AuthorizationLevel authorizationLevel)
+    public UserAuthJpaEntity(UserJpaEntity user, String hashedpass, AuthorizationLevel authorizationLevel)
     {
         this.user = user;
-        this.hashedPassword = hashedPassword;
+        this.hashedpass = hashedpass;
         this.authorizationLevel = authorizationLevel;
     }
 
@@ -57,14 +58,14 @@ public class UserAuthJpaEntity
         this.user = user;
     }
 
-    public String getHashedPassword()
+    public String getHashedpass()
     {
-        return hashedPassword;
+        return hashedpass;
     }
 
-    public void setHashedPassword(String hashedPassword)
+    public void setHashedpass(String hashedPassword)
     {
-        this.hashedPassword = hashedPassword;
+        this.hashedpass = hashedPassword;
     }
 
     public AuthorizationLevel getAuthorizationLevel()

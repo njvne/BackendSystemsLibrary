@@ -5,7 +5,6 @@ public class Borrow
 {
     private BookISBN isbn;
     private UserID userid;
-    private Date borrowdate;
     private boolean returned;
 
 

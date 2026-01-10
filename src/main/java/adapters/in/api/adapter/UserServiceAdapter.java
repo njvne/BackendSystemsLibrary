@@ -36,7 +36,7 @@ public class UserServiceAdapter
     @Inject
     ReturnBookUseCase returnBookUseCase;
 
-    private Mapper mapper;
+    private Mapper mapper = new Mapper();
 
 
     public BorrowResult createBorrow(long uid, long isbn)

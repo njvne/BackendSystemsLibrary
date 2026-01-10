@@ -70,7 +70,6 @@ public class Mapper
         final var borrowDTO = new BorrowDTO();
         borrowDTO.setUserid(borrow.getUserid());
         borrowDTO.setIsbn(borrow.getIsbn());
-        borrowDTO.setBorrowdate(borrow.getBorrowdate());
         borrowDTO.setReturned(borrow.isReturned());
         return borrowDTO;
     }
@@ -80,7 +79,6 @@ public class Mapper
         final var borrow = new Borrow();
         borrow.setUserid(borrowDTO.getUserid());
         borrow.setIsbn(borrowDTO.getIsbn());
-        borrow.setBorrowdate(borrowDTO.getBorrowdate());
         borrow.setReturned(borrowDTO.isReturned());
         return borrow;
     }

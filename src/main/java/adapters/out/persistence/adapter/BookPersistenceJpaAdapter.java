@@ -100,7 +100,7 @@ public class BookPersistenceJpaAdapter implements DeleteBookPort, ReadAllBooksPo
             }
             catch (NoResultException e)
             {
-                //em.getTransaction().begin();                        //transaction because we persist multiple entities (book AND its book copies). crashes the code tho
+                //this.em.getTransaction().begin();     "not supported for JTA entity managers"
                 book.setIsbn(isbn);
                 final var model = this.mapper.bookToEntity(book);
                 model.setIsbn(isbn.getISBN());
@@ -111,14 +111,14 @@ public class BookPersistenceJpaAdapter implements DeleteBookPort, ReadAllBooksPo
                     copy.setBook(model);
                     this.em.persist(copy);
                 }
-                //em.getTransaction().commit();
+                //this.em.getTransaction().commit();    "not supported for JTA entity managers"
                 returnValue.setError(PutStatus.CREATED, "Created");
             }
         }
         catch(Exception e)
         {
             System.out.println(e.getMessage());
-            returnValue.setError(ErrorCodes.IMPOSSIBLE_UPDATE, "Error Updating Book, likely couldn't remove book because all are borrowed.");
+            returnValue.setError(ErrorCodes.IMPOSSIBLE_UPDATE, "Error updating or persisting book");
         }
         return returnValue;
     }
@@ -211,7 +211,7 @@ public class BookPersistenceJpaAdapter implements DeleteBookPort, ReadAllBooksPo
 
     private int addAmountOfCopies(Book book)
     {
-        TypedQuery<BookCopyJpaEntity> queue = em.createQuery("FROM BookCopyJpaEntity bc WHERE bc.book = :book AND isRetired = false", BookCopyJpaEntity.class);
+        TypedQuery<BookCopyJpaEntity> queue = em.createQuery("FROM BookCopyJpaEntity bc WHERE bc.book = :book AND bc.isRetired = false", BookCopyJpaEntity.class);
         queue.setParameter("book", this.mapper.bookToEntity(book));
         int i = queue.getResultList().size();
         book.setCopyAmount(i);

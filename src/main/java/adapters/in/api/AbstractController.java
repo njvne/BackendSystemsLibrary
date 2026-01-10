@@ -8,7 +8,6 @@ import adapters.in.api.utils.Hyperlinks;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
-
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -17,6 +16,9 @@ import java.util.Base64;
 
 public abstract class AbstractController
 {
+    final String shortorlongpass = "badpassword";
+
+
     public AuthorizationResult checkAuthorizationLevel(HttpHeaders httpHeaders, long reqid)
     {
         try//necessary to process requests sent without auth
@@ -133,12 +135,23 @@ public abstract class AbstractController
             final String userColonPass = decodeAsString(withoutBasic);
             String[] res = userColonPass.split(":", 2);
             try{
+                if(res[1].length() <= 8 || res[1].length() > 25)
+                {
+                    throw new WrongCredentialsException();
+                }
                 MessageDigest digest = MessageDigest.getInstance("SHA-256");                //hashing on server side
                 res[1] = Arrays.toString(digest.digest(res[1].getBytes(StandardCharsets.UTF_8)));
+                return res;
             }
             catch (NoSuchAlgorithmException e)
             {
                 return new String[2];
+            }
+            catch (WrongCredentialsException e)
+            {
+                String[] ress = new String[2];
+                ress[1] = shortorlongpass;
+                return ress;
             }
         }
         return new String[2];

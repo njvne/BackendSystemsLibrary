@@ -13,8 +13,6 @@ public class BorrowDTO extends AbstractDataTransferObject
     private BookISBN isbn;
     @NotBlank (message = "Borrow must be tied to a user")
     private UserID userid;
-    @NotBlank (message = "The borrows date must be included")
-    private Date borrowdate;
 
     private boolean returned = false;
 
@@ -37,16 +35,6 @@ public class BorrowDTO extends AbstractDataTransferObject
     public void setUserid(UserID userid)
     {
         this.userid = userid;
-    }
-
-    public Date getBorrowdate()
-    {
-        return borrowdate;
-    }
-
-    public void setBorrowdate(Date borrowdate)
-    {
-        this.borrowdate = borrowdate;
     }
 
     public boolean isReturned()

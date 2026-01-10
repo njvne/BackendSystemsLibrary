@@ -1,5 +1,6 @@
 package adapters.out.persistence.adapter;
 
+import adapters.out.persistence.Mapper;
 import application.domain.models.Borrow;
 import application.domain.results.BorrowResult;
 import application.domain.results.BorrowsResult;
@@ -17,6 +18,9 @@ public class BorrowBersistenceJpaAdapter implements PersistBorrowPort, ReadAllBo
 {
     @Inject
     EntityManager em;
+
+    private Mapper mapper = new Mapper();
+
 
     @Override
     public NoContentResult createBorrow(Borrow borrow)
