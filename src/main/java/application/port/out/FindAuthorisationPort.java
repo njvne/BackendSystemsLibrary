@@ -4,5 +4,5 @@ import application.domain.Authorisation.AuthorizationResult;
 
 public interface FindAuthorisationPort
 {
-    AuthorizationResult checkPasswordCombination(String username, String password);
+    AuthorizationResult checkPasswordCombination(long uid, String password);
 }

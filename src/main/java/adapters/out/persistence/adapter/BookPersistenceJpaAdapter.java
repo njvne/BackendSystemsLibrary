@@ -110,6 +110,7 @@ public class BookPersistenceJpaAdapter implements DeleteBookPort, ReadAllBooksPo
                     final var copy = new BookCopyJpaEntity();
                     copy.setBook(model);
                     this.em.persist(copy);
+                    this.em.flush();
                 }
                 //this.em.getTransaction().commit();    "not supported for JTA entity managers"
                 returnValue.setError(PutStatus.CREATED, "Created");

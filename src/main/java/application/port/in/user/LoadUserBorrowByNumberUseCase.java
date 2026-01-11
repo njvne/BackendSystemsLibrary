@@ -4,5 +4,5 @@ import application.domain.results.BorrowResult;
 
 public interface LoadUserBorrowByNumberUseCase
 {
-    BorrowResult loadBorrowByNumber(long uid, long borrowNumber);
+    BorrowResult loadBorrowByNumber(long borrowNumber);
 }

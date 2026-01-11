@@ -4,5 +4,5 @@ import application.domain.results.BorrowResult;
 
 public interface ReadBorrowByNumberPort
 {
-    BorrowResult readBorrowByNumber(long uid, long borrowNumber);
+    BorrowResult readBorrowByNumber(long borrowNumber);
 }

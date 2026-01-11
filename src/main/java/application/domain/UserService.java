@@ -1,11 +1,12 @@
 package application.domain;
 
-import application.domain.models.BookISBN;
+import application.domain.Authorisation.AuthorizationResult;
 import application.domain.models.Borrow;
 import application.domain.models.User;
-import application.domain.models.UserID;
 import application.domain.results.*;
+import application.port.in.FindAuthorisationUseCase;
 import application.port.in.user.*;
+import application.port.out.FindAuthorisationPort;
 import application.port.out.user.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -29,7 +30,7 @@ public class UserService implements CreateBorrowUseCase, CreateUserUseCase, Load
     ReadUserByIdPort readUserByIdPort;
 
     @Inject
-    ReturnBookUseCase returnBookUseCase;
+    ReturnBookUseCase returnBookPort;
 
 
 
@@ -52,9 +53,9 @@ public class UserService implements CreateBorrowUseCase, CreateUserUseCase, Load
     }
 
     @Override
-    public BorrowResult loadBorrowByNumber(long uid, long borrowNumber)
+    public BorrowResult loadBorrowByNumber(long borrowNumber)
     {
-        return this.readBorrowByNumberPort.readBorrowByNumber(uid, borrowNumber);
+        return this.readBorrowByNumberPort.readBorrowByNumber(borrowNumber);
     }
 
     @Override
@@ -66,7 +67,7 @@ public class UserService implements CreateBorrowUseCase, CreateUserUseCase, Load
     @Override
     public NoContentResult returnBook(long uid, long borrowNumber)
     {
-        final var result = this.readBorrowByNumberPort.readBorrowByNumber(uid, borrowNumber);
+        final var result = this.readBorrowByNumberPort.readBorrowByNumber(borrowNumber);
         final var returnValue = new NoContentResult();
 
         if( result.isEmpty() )
@@ -83,7 +84,7 @@ public class UserService implements CreateBorrowUseCase, CreateUserUseCase, Load
         }
         else
         {
-            this.returnBookUseCase.returnBook(uid, borrowNumber);
+            this.returnBookPort.returnBook(uid, borrowNumber);
         }
         return returnValue;
     }

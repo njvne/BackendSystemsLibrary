@@ -1,11 +1,9 @@
 package adapters.out.persistence;
 
 import adapters.out.persistence.models.BookJpaEntity;
+import adapters.out.persistence.models.BorrowingJpaEntity;
 import adapters.out.persistence.models.UserJpaEntity;
-import application.domain.models.Book;
-import application.domain.models.BookISBN;
-import application.domain.models.User;
-import application.domain.models.UserID;
+import application.domain.models.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -56,7 +54,28 @@ public class Mapper
         return user;
     }
 
+    public BorrowingJpaEntity borrowToEntity(Borrow borrow)
+    {
+        final var res = new BorrowingJpaEntity();
+        res.setIsactive(borrow.isReturned());
+        return res;
+    }
 
+    public Borrow borrowToDomain(BorrowingJpaEntity borrow)
+    {
+        final var res = new Borrow();
+        res.setUserid(new UserID(borrow.getUser().getUserid()));
+        res.setIsbn(new BookISBN(borrow.getBookcopy().getBook().getIsbn()));
+        res.setReturned(borrow.isIsactive());
+        return res;
+    }
+
+
+
+    public List<Borrow> borrowsToDomainModels(List<BorrowingJpaEntity> borrowJpas)
+    {
+        return borrowJpas.stream().map(this::borrowToDomain).collect(Collectors.toList());
+    }
 
     public List<Book> booksToDomainModels(List<BookJpaEntity> bookJpas)
     {

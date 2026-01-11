@@ -65,7 +65,7 @@ public class UserWebController extends AbstractController
         final var result = this.userServiceAdapter.getUserById(uid);
         final Response.ResponseBuilder builder = Response.ok(result);
         addSelfLinkToDTO(result.getUserDTO());
-        //addDefaultLinksByAuthorizationLevel(uriInfo, builder, res);
+        addDefaultLinksByAuthorizationLevel(uriInfo, builder, res);
         return builder.build();
     }
 

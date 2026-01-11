@@ -1,10 +1,14 @@
 package adapters.in.api;
 
+import adapters.in.api.adapter.UserServiceAdapter;
 import application.domain.Authorisation.AuthorizationLevel;
 import application.domain.Authorisation.AuthorizationResult;
 import adapters.in.api.Exceptions.MissingLoginDataException;
 import adapters.in.api.Exceptions.WrongCredentialsException;
 import adapters.in.api.utils.Hyperlinks;
+import application.domain.UserService;
+import io.quarkus.security.UnauthorizedException;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
@@ -16,7 +20,12 @@ import java.util.Base64;
 
 public abstract class AbstractController
 {
+
+    @Inject
+    UserServiceAdapter userServiceAdapter;
+
     final String shortorlongpass = "badpassword";
+
 
 
     public AuthorizationResult checkAuthorizationLevel(HttpHeaders httpHeaders, long reqid)
@@ -24,21 +33,16 @@ public abstract class AbstractController
         try//necessary to process requests sent without auth
         {
             final String[] asArray = getUsernameAndPasswordAsArray(httpHeaders);
-            final String username = asArray[0];
+            final long userid = Long.parseLong(asArray[0]);
             final String password = asArray[1];
-            if (username != null && password != null)
+            if (userid > 0 && password != null)
             {
-                if(false) //todo: check if authentication is valid. potentially include admin things too.
+                AuthorizationResult r = this.userServiceAdapter.checkAuth(userid, password);
+                if(reqid != r.getRelatedUserID())
                 {
-                    throw new WrongCredentialsException();
+                    throw new UnauthorizedException("Unauthorized");
                 }
-                AuthorizationLevel level = AuthorizationLevel.USER;
-                int id = 0;
-                if(reqid != id)
-                {
-                    throw new WrongCredentialsException();
-                }
-                return new AuthorizationResult(level, id);
+                return r;
             }
             else
             {
@@ -57,17 +61,11 @@ public abstract class AbstractController
         try//necessary to process requests sent without auth
         {
             final String[] asArray = getUsernameAndPasswordAsArray(httpHeaders);
-            final String username = asArray[0];
+            final long userid = Long.parseLong(asArray[0]);
             final String password = asArray[1];
-            if (username != null && password != null)
+            if (userid > 0 && password != null)
             {
-                if(false) //todo: check if authentication is valid. potentially include admin things too.
-                {
-                    throw new WrongCredentialsException();
-                }
-                AuthorizationLevel level = AuthorizationLevel.USER;
-                int id = 0;
-                return new AuthorizationResult(level, id);
+                return this.userServiceAdapter.checkAuth(userid, password);
             }
             else
             {

@@ -84,7 +84,7 @@ public class BookWebController extends AbstractController
     public Response updateOrCreateBook(@Positive @PathParam("isbn") long isbn, @Valid BookDTO book)
     {
         final AuthorizationResult res = checkAuthorizationLevelWithoutId(httpHeaders);
-        if(res.getAuthorizationLevel() == AuthorizationLevel.ADMIN)
+        if(res.getAuthorizationLevel() != AuthorizationLevel.ADMIN)
         {
             return Response.status(Response.Status.UNAUTHORIZED).build();
         }

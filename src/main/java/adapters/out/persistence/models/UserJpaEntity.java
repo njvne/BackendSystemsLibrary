@@ -13,7 +13,6 @@ public class UserJpaEntity
     private String surname;
     private long phonenumber;
     private String email;
-    private String password;
 
 
 

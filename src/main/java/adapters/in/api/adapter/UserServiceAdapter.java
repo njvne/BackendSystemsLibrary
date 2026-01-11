@@ -1,13 +1,13 @@
 package adapters.in.api.adapter;
 
 import adapters.in.api.Exceptions.ResourceConflictException;
-import adapters.in.api.models.BorrowDTO;
 import adapters.in.api.models.UserDTO;
+import application.domain.Authorisation.AuthorizationResult;
 import application.domain.models.BookISBN;
 import application.domain.models.Borrow;
 import application.domain.models.UserID;
 import application.domain.results.ErrorCodes;
-import application.domain.results.NoContentResult;
+import application.port.in.FindAuthorisationUseCase;
 import application.port.in.user.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -18,6 +18,9 @@ import jakarta.ws.rs.NotFoundException;
 @ApplicationScoped
 public class UserServiceAdapter
 {
+    @Inject
+    FindAuthorisationUseCase findAuthorisationUseCase;
+
     @Inject
     CreateBorrowUseCase createBorrowUseCase;
 
@@ -89,7 +92,7 @@ public class UserServiceAdapter
 
     public BorrowResult getBorrowByNumber(long uid, long number)
     {
-        final var domainResult = this.loadUserBorrowByIdUseCase.loadBorrowByNumber(uid, number);
+        final var domainResult = this.loadUserBorrowByIdUseCase.loadBorrowByNumber(number);
 
         if(domainResult.isEmpty())
         {
@@ -133,5 +136,11 @@ public class UserServiceAdapter
                 throw new InternalServerErrorException(domainResult.getErrorMessage());
             }
         }
+    }
+
+
+    public AuthorizationResult checkAuth(long uid, String password)
+    {
+        return this.findAuthorisationUseCase.checkAuthorisation(uid, password);
     }
 }

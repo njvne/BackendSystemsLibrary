@@ -4,5 +4,5 @@ import application.domain.Authorisation.AuthorizationResult;
 
 public interface FindAuthorisationUseCase
 {
-    public AuthorizationResult checkAuthorisation(String username, String password);
+    AuthorizationResult checkAuthorisation(long uid, String password);
 }

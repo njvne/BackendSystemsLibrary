@@ -3,6 +3,7 @@ import java.util.Date;
 
 public class Borrow
 {
+    private long id;
     private BookISBN isbn;
     private UserID userid;
     private boolean returned;
@@ -17,6 +18,12 @@ public class Borrow
 
 
     //getters and setters
+
+
+    public long getId() {return id;}
+
+    public void setId(long id) {this.id = id;}
+
     public BookISBN getIsbn() { return isbn; }
 
     public void setIsbn(BookISBN isbn) { this.isbn = isbn; }

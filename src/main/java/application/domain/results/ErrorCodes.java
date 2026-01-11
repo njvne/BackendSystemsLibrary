@@ -9,4 +9,6 @@ public interface ErrorCodes     //CONSIDER WRITING THIS AS ENUM
     int RESOURCE_NOT_FOUND = 404;
     int RESOURCE_UNAVAILABLE = 404;
     int IMPOSSIBLE_UPDATE = 422;
+    int PRECONDITION_FAILED = 412;
+    int IM_A_TEAPOT = 418;
 }
