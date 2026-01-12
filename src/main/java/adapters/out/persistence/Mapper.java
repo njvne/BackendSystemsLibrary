@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 
 public class Mapper
 {
-    //todo
 
     public BookJpaEntity bookToEntity(Book book)
     {

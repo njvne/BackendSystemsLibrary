@@ -1,7 +1,5 @@
 package adapters.in.api.adapter;
 
-import adapters.in.api.Exceptions.IllegalUpdateException;
-import adapters.in.api.Exceptions.ResourceConflictException;
 import adapters.in.api.models.BookDTO;
 import application.domain.models.BookISBN;
 import application.domain.results.ErrorCodes;
@@ -10,7 +8,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
-import org.apache.commons.collections4.Put;
 
 @ApplicationScoped
 public class BookServiceAdapter

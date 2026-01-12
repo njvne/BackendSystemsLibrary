@@ -1,7 +1,6 @@
 package adapters.out.persistence.adapter;
 
 import adapters.out.persistence.Mapper;
-import adapters.out.persistence.models.BorrowingJpaEntity;
 import adapters.out.persistence.models.UserAuthJpaEntity;
 import adapters.out.persistence.models.UserJpaEntity;
 import application.domain.Authorisation.AuthorizationLevel;
@@ -11,7 +10,6 @@ import application.domain.models.UserID;
 import application.domain.results.ErrorCodes;
 import application.domain.results.NoContentResult;
 import application.domain.results.UserResult;
-import application.port.in.FindAuthorisationUseCase;
 import application.port.out.FindAuthorisationPort;
 import application.port.out.user.*;
 import jakarta.annotation.PostConstruct;

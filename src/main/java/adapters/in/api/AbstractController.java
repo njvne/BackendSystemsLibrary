@@ -6,7 +6,6 @@ import application.domain.Authorisation.AuthorizationResult;
 import adapters.in.api.Exceptions.MissingLoginDataException;
 import adapters.in.api.Exceptions.WrongCredentialsException;
 import adapters.in.api.utils.Hyperlinks;
-import application.domain.UserService;
 import io.quarkus.security.UnauthorizedException;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.HttpHeaders;
@@ -30,7 +29,7 @@ public abstract class AbstractController
 
     public AuthorizationResult checkAuthorizationLevel(HttpHeaders httpHeaders, long reqid)
     {
-        try//necessary to process requests sent without auth
+        try
         {
             final String[] asArray = getUsernameAndPasswordAsArray(httpHeaders);
             final long userid = Long.parseLong(asArray[0]);
@@ -58,7 +57,7 @@ public abstract class AbstractController
 
     public AuthorizationResult checkAuthorizationLevelWithoutId(HttpHeaders httpHeaders)
     {
-        try//necessary to process requests sent without auth
+        try
         {
             final String[] asArray = getUsernameAndPasswordAsArray(httpHeaders);
             final long userid = Long.parseLong(asArray[0]);

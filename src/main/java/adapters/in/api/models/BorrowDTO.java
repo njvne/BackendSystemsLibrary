@@ -3,9 +3,7 @@ package adapters.in.api.models;
 import application.domain.models.BookISBN;
 import application.domain.models.UserID;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.ws.rs.DefaultValue;
 
-import java.util.Date;
 
 public class BorrowDTO extends AbstractDataTransferObject
 {

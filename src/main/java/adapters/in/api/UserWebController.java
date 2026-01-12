@@ -23,9 +23,6 @@ public class UserWebController extends AbstractController
     @Inject
     UserServiceAdapter userServiceAdapter;
 
-    @Inject
-    private Validator validator;
-
     @Context
     private UriInfo uriInfo;
 

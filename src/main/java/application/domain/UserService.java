@@ -1,12 +1,9 @@
 package application.domain;
 
-import application.domain.Authorisation.AuthorizationResult;
 import application.domain.models.Borrow;
 import application.domain.models.User;
 import application.domain.results.*;
-import application.port.in.FindAuthorisationUseCase;
 import application.port.in.user.*;
-import application.port.out.FindAuthorisationPort;
 import application.port.out.user.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -30,7 +27,7 @@ public class UserService implements CreateBorrowUseCase, CreateUserUseCase, Load
     ReadUserByIdPort readUserByIdPort;
 
     @Inject
-    ReturnBookUseCase returnBookPort;
+    ReturnBookPort returnBookPort;
 
 
 
@@ -84,7 +81,7 @@ public class UserService implements CreateBorrowUseCase, CreateUserUseCase, Load
         }
         else
         {
-            this.returnBookPort.returnBook(uid, borrowNumber);
+            return this.returnBookPort.returnBook(borrowNumber);
         }
         return returnValue;
     }

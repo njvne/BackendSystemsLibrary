@@ -1,10 +1,8 @@
 package adapters.in.api.models;
 
-import application.domain.models.UserID;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.xml.bind.annotation.XmlRootElement;
 
-import java.util.Date;
 
 @SuppressWarnings("SpellCheckingInspection")
 @XmlRootElement(name = "user")

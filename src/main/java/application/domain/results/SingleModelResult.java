@@ -1,6 +1,5 @@
 package application.domain.results;
 
-import org.glassfish.jaxb.runtime.v2.runtime.unmarshaller.XsiNilLoader;
 
 public class SingleModelResult<E> extends AbstractResult
 {

@@ -1,5 +1,4 @@
 package application.domain.models;
-import java.util.Date;
 
 public class User {
     private UserID userid;
