@@ -2,6 +2,14 @@
 Commands including -Dquarkus require quotation marks as documented as for me, they were wrongly interpreted as lifecycle phases otherwise.
 All commands were done within IntelliJ local terminal, so other terminals or bash may require to leave the quotation marks away.
 
+first of all, please do make sure to use "mvn verify"
+
+command to just run the application in quarkus:
+mvn compile quarkus:dev
+
+
+since the last given docker command (for testing) only worked for me after using all 4 below commands first, please do run them before using the last command as well. I had quite some issues setting up docker, so i really hope it works on another computer as well.
+
 Creating docker image:
 docker build -f src/test/docker/Dockerfile --tag myapp:1.0 .
 docker run --rm -p 8080:8080 myapp:1.0
@@ -13,6 +21,3 @@ mvn package -Dquarkus.package.jar.type=uber-jar"
 
 Integration testing: (this only worked for me after using mvn package and creating the docker build)
 mvn -f pom-docker.xml clean verify "-Dquarkus.http.test-port=8080" "-Dquarkus.http.test-host=localhost"
-
-
-running just the application:
