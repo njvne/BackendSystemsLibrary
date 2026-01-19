@@ -1,6 +1,5 @@
 package adapters.in.api;
 
-import application.domain.results.PutStatus;
 import application.domain.Authorisation.AuthorizationLevel;
 import application.domain.Authorisation.AuthorizationResult;
 import adapters.in.api.adapter.BookServiceAdapter;
@@ -18,9 +17,10 @@ import jakarta.ws.rs.core.*;
 import java.util.List;
 
 
-@Path("library/books")    //maybe separate controllers for users, books, etc.? Refer to Unit 17 CRUD
+@Path("library/books")
 public class BookWebController extends AbstractController
 {
+
     @Inject
     private BookServiceAdapter bookServiceAdapter;
 
@@ -91,10 +91,7 @@ public class BookWebController extends AbstractController
         book.setId(isbn);
         int i = this.bookServiceAdapter.updateBook(isbn, book);
         Response.ResponseBuilder r = Response.status(i);
-        if(i == PutStatus.CREATED)
-        {
-            r.header("Location", createLocationHeader(book));
-        }
+        r.header("Location", createLocationHeader(book));
         addDefaultLinksByAuthorizationLevel(uriInfo, r, res);
         return r.build();
     }
@@ -155,32 +152,4 @@ public class BookWebController extends AbstractController
         book.getSelfLink().setRel("self");
         book.getSelfLink().setType(httpHeaders.getHeaderString("Accept"));
     }
-
-    //todo: Update/Creation with put, Delete: ONLY WITH ADMIN PRIVILEGES!!!! Otherwise, return 403 forbidden. hyperlinks also only provided to logged in admins
-
-    // EXAMPLE HYPERLINK MANAGER. TO IMPLEMENT: HYPERLINKS FOR BOOKS (and then for the other webcontrollers too)
-    /*
-    private String createLocationHeader( UniversityDTO model )
-    {
-        return uriInfo.getRequestUriBuilder( ).path( Long.toString( model.getId( ) ) ).build( ).toString( );
-    }
-
-    private void addSelfLinksToUniversities( List<UniversityDTO> models )
-    {
-        models.forEach( this::addSelfLinkToUniversity );
-    }
-
-    private void addSelfLinkToUniversity( UniversityDTO university )
-    {
-        final var currentUri = uriInfo.getAbsolutePath( );
-        final var path = currentUri.getPath( );
-        final var newPath = path.replaceFirst( "/\\d*$", "" );
-        final var newUri = UriBuilder.fromUri( currentUri )
-                .replacePath( newPath + "/" + university.getId( ) )
-                .build( );
-
-        university.getSelfLink( ).setHref( newUri.toASCIIString( ) );
-        university.getSelfLink( ).setRel( "self" );
-        university.getSelfLink( ).setType( httpHeaders.getHeaderString( "Accept" ) );
-    }*/
 }

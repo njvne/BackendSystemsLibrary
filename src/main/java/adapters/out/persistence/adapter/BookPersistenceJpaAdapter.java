@@ -32,8 +32,8 @@ public class BookPersistenceJpaAdapter implements DeleteBookPort, ReadAllBooksPo
 
 
 
-    @Transactional
     @Override
+    @Transactional
     public NoContentResult deleteBook(BookISBN bookISBN)
     {
         BookJpaEntity toDelete = this.em.find(BookJpaEntity.class, bookISBN.getISBN());
@@ -47,9 +47,9 @@ public class BookPersistenceJpaAdapter implements DeleteBookPort, ReadAllBooksPo
         return new NoContentResult();
     }
 
-    @Transactional
     @Override
-    public NoContentResult updateOrPersistBook(Book book, BookISBN isbn)
+    @Transactional
+    public NoContentResult updateOrPersistBook(Book book, BookISBN isbn)        //logic COULD be better fit in domain, creates more back and forth calls though
     {
         final var returnValue = new NoContentResult();
         try
