@@ -23,7 +23,7 @@ import java.util.List;
 
 
 @ApplicationScoped
-public class BookPersistenceJpaAdapter implements DeleteBookPort, ReadAllBooksPort, ReadBookByIdPort, ReadBooksByFilterPort, UpdateBookPort
+public class BookPersistenceJpaAdapter implements DeleteBookPort, ReadAllBooksPort, ReadBookByIdPort, ReadBooksByFilterPort, UpdateBookPort, CreateBookPort
 {
     @Inject
     EntityManager em;
@@ -47,72 +47,56 @@ public class BookPersistenceJpaAdapter implements DeleteBookPort, ReadAllBooksPo
         return new NoContentResult();
     }
 
+
     @Override
     @Transactional
-    public NoContentResult updateOrPersistBook(Book book, BookISBN isbn)        //logic COULD be better fit in domain, creates more back and forth calls though
+    public NoContentResult updateBook(Book book, BookISBN isbn)        //logic COULD be better fit in domain, creates more back and forth calls though
     {
         final var returnValue = new NoContentResult();
         try
         {
-            try
+            BookJpaEntity res = this.em.find(BookJpaEntity.class, isbn.getISBN());
+            if(res == null)
             {
-                BookJpaEntity res = this.em.find(BookJpaEntity.class, isbn.getISBN());
-                if(res == null)
-                {
-                    throw new NoResultException();
-                }
-                final var bookEntity = this.mapper.bookToEntity(book);
-                long toBe = book.getCopyAmount();
-                long currCopyAmount = addAmountOfCopies(this.mapper.bookToDomain(res));
-                if(currCopyAmount != toBe)
-                {
-                    if(toBe < currCopyAmount)
-                    {
-                        TypedQuery<BookCopyJpaEntity> queue = em.createQuery(
-                                "FROM BookCopyJpaEntity bc LEFT JOIN BorrowingJpaEntity b ON b.bookcopy = bc AND b.isactive = false WHERE bc.book = :book AND bc.isRetired = false"
-                                , BookCopyJpaEntity.class);
-                        queue.setParameter("book", res);
-                        final var nonBorrowedBooks = queue.getResultList();
-                        System.out.println("queue size: " + nonBorrowedBooks.size());
-                        /*if(currCopyAmount > nonBorrowedBooks.size()) {throw new IllegalArgumentException();}*/
-                        while(toBe < currCopyAmount)
-                        {
-                            nonBorrowedBooks.getFirst().setRetired(true);
-                            nonBorrowedBooks.removeFirst();
-                            currCopyAmount--;
-                        }
-                    }
-                    while(book.getCopyAmount() > currCopyAmount)
-                    {
-                        final var copy = new BookCopyJpaEntity();
-                        copy.setBook(res);
-                        this.em.persist(copy);
-                        currCopyAmount++;
-                    }
-                }
-                this.em.lock(res, LockModeType.PESSIMISTIC_WRITE);
-                res.setAuthor(bookEntity.getAuthor());
-                res.setTitle(bookEntity.getTitle());
-                res.setDescription(bookEntity.getDescription());
-                this.em.lock(res, LockModeType.NONE);
-                this.em.flush();
-                returnValue.setError(PutStatus.UPDATED, "");
+                throw new NoResultException();
             }
-            catch (NoResultException e)
+            final var bookEntity = this.mapper.bookToEntity(book);
+            long toBe = book.getCopyAmount();
+            long currCopyAmount = addAmountOfCopies(this.mapper.bookToDomain(res));
+            if(currCopyAmount != toBe)
             {
-                book.setIsbn(isbn);
-                final var model = this.mapper.bookToEntity(book);
-                model.setIsbn(isbn.getISBN());
-                this.em.persist(model);
-                for(int i = 0; i < book.getCopyAmount(); i++)
+                if(toBe < currCopyAmount)
+                {
+                    TypedQuery<BookCopyJpaEntity> queue = em.createQuery(
+                            "FROM BookCopyJpaEntity bc LEFT JOIN BorrowingJpaEntity b ON b.bookcopy = bc AND b.isactive = false WHERE bc.book = :book AND bc.isRetired = false"
+                            , BookCopyJpaEntity.class);
+                    queue.setParameter("book", res);
+                    final var nonBorrowedBooks = queue.getResultList();
+                    System.out.println("queue size: " + nonBorrowedBooks.size());
+
+                    while(toBe < currCopyAmount)
+                    {
+                        nonBorrowedBooks.getFirst().setRetired(true);
+                        nonBorrowedBooks.removeFirst();
+                        currCopyAmount--;
+                    }
+                }
+                while(book.getCopyAmount() > currCopyAmount)
                 {
                     final var copy = new BookCopyJpaEntity();
-                    copy.setBook(model);
+                    copy.setBook(res);
                     this.em.persist(copy);
-                    this.em.flush();
+                    currCopyAmount++;
                 }
-                returnValue.setError(PutStatus.CREATED, "Created");
             }
+            this.em.lock(res, LockModeType.PESSIMISTIC_WRITE);
+            res.setAuthor(bookEntity.getAuthor());
+            res.setTitle(bookEntity.getTitle());
+            res.setDescription(bookEntity.getDescription());
+            this.em.lock(res, LockModeType.NONE);
+            this.em.flush();
+            returnValue.setError(PutStatus.UPDATED, "");
+
         }
         catch(Exception e)
         {
@@ -120,6 +104,26 @@ public class BookPersistenceJpaAdapter implements DeleteBookPort, ReadAllBooksPo
         }
         return returnValue;
     }
+
+
+    @Transactional
+    @Override
+    public NoContentResult createBook(Book book, BookISBN isbn)
+    {
+        book.setIsbn(isbn);
+        final var model = this.mapper.bookToEntity(book);
+        model.setIsbn(isbn.getISBN());
+        this.em.persist(model);
+        for(int i = 0; i < book.getCopyAmount(); i++)
+        {
+            final var copy = new BookCopyJpaEntity();
+            copy.setBook(model);
+            this.em.persist(copy);
+            this.em.flush();
+        }
+        return new NoContentResult();
+    }
+
 
     @Override
     public BooksResult loadAllBooks(int page)

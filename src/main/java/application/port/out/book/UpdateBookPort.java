@@ -6,5 +6,5 @@ import application.domain.results.NoContentResult;
 
 public interface UpdateBookPort
 {
-    NoContentResult updateOrPersistBook(Book book, BookISBN isbn);
+    NoContentResult updateBook(Book book, BookISBN isbn);
 }

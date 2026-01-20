@@ -31,24 +31,24 @@ public class CacheFilter implements ContainerResponseFilter
 
         Object ent = responseContext.getEntity();
         if(ent == null){return;}
-
         EntityTag etag = new EntityTag(generateEtag(ent), true);
         responseContext.getHeaders().putSingle("ETag", etag);
 
         String ifNoneMatch = requestContext.getHeaderString("If-None-Match");
-        if (ifNoneMatch != null && etag.equals(new EntityTag(ifNoneMatch, true))) {
+        if (ifNoneMatch != null && etag.equals(new EntityTag(ifNoneMatch, true)))
+        {
             responseContext.setStatusInfo(Response.Status.NOT_MODIFIED);
             responseContext.setEntity(null);
             return;
         }
-
         String path = requestContext.getUriInfo().getPath();
-        if (path.contains("/users")) {
+        if (path.contains("/users"))
+        {
             responseContext.getHeaders().putSingle("Cache-Control", "private, max-age=60");
-        } else {
+        } else
+        {
             responseContext.getHeaders().putSingle("Cache-Control", "public, max-age=300");
         }
-
     }
 
 
@@ -65,6 +65,5 @@ public class CacheFilter implements ContainerResponseFilter
         {
             return String.valueOf(obj.hashCode());
         }
-
     }
 }

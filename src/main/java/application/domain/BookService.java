@@ -1,11 +1,8 @@
 package application.domain;
 
-import application.domain.results.PutStatus;
+import application.domain.results.*;
 import application.domain.models.Book;
 import application.domain.models.BookISBN;
-import application.domain.results.BookResult;
-import application.domain.results.BooksResult;
-import application.domain.results.NoContentResult;
 import application.port.in.book.*;
 import application.port.out.book.*;
 import jakarta.annotation.PostConstruct;
@@ -32,6 +29,10 @@ public class BookService implements DeleteBookUseCase, LoadAllBooksUseCase, Load
     @Inject
     UpdateBookPort updateBookPort;
 
+    @Inject
+    CreateBookPort createBookPort;
+
+
 
 
     @Override
@@ -55,17 +56,38 @@ public class BookService implements DeleteBookUseCase, LoadAllBooksUseCase, Load
     @Override
     public NoContentResult updateOrCreateBook(BookISBN isbn, Book book)
     {
+        final var temp = this.readBookByIdPort.loadBookById(isbn);
         final var returnValue = new NoContentResult();
-        final var result = this.updateBookPort.updateOrPersistBook(book, isbn);
-        if(result.getErrorCode() == PutStatus.CREATED || result.getErrorCode() == PutStatus.UPDATED)
+
+        if(temp.isEmpty())
         {
-            return result;
+            final var result = this.createBookPort.createBook(book, isbn);
+            if(result.hasError())
+            {
+                returnValue.setError(result.getErrorCode(), result.getErrorMessage());
+            }
+            else
+            {
+                returnValue.setError(PutStatus.CREATED, "Book created successfully");
+            }
+        }
+        else if(temp.getResult().getIsbn().getISBN() != isbn.getISBN())
+        {
+            returnValue.setError(ErrorCodes.RESOURCE_ID_DOES_NOT_MATCH, "path id: " + isbn.getISBN() + " does not match resource id: " + temp.getResult().getIsbn().getISBN());
         }
         else
         {
-            returnValue.setError(result.getErrorCode(), result.getErrorMessage());
-            return returnValue;
+            final var result = this.updateBookPort.updateBook(book, isbn);
+            if(result.hasError())
+            {
+                returnValue.setError(result.getErrorCode(), result.getErrorMessage());
+            }
+            else
+            {
+                returnValue.setError(PutStatus.UPDATED, "Book updated successfully");
+            }
         }
+        return returnValue;
     }
 
     @Override
@@ -92,6 +114,6 @@ public class BookService implements DeleteBookUseCase, LoadAllBooksUseCase, Load
         nu.setDescription("This is the description");
         nu.setTitle("This is the title");
         nu.setCopyAmount(2);
-        this.updateBookPort.updateOrPersistBook(nu, new BookISBN(123456789));
+        this.updateBookPort.updateBook(nu, new BookISBN(123456789));
     }
 }
