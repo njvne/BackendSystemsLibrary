@@ -100,7 +100,6 @@ public class BookPersistenceJpaAdapter implements DeleteBookPort, ReadAllBooksPo
             }
             catch (NoResultException e)
             {
-                //this.em.getTransaction().begin();     "not supported for JTA entity managers"
                 book.setIsbn(isbn);
                 final var model = this.mapper.bookToEntity(book);
                 model.setIsbn(isbn.getISBN());
@@ -112,13 +111,11 @@ public class BookPersistenceJpaAdapter implements DeleteBookPort, ReadAllBooksPo
                     this.em.persist(copy);
                     this.em.flush();
                 }
-                //this.em.getTransaction().commit();    "not supported for JTA entity managers"
                 returnValue.setError(PutStatus.CREATED, "Created");
             }
         }
         catch(Exception e)
         {
-            System.out.println(e.getMessage());
             returnValue.setError(ErrorCodes.IMPOSSIBLE_UPDATE, "Error updating or persisting book");
         }
         return returnValue;
