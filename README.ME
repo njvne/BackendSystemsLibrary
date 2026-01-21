@@ -1,5 +1,5 @@
 !!!!!IMPORTANT!!!!!!
-Commands including -Dquarkus require quotation marks (as documented here) because for me, they were wrongly interpreted as lifecycle phases otherwise.
+Commands for docker including -Dquarkus required quotation marks (as documented here) because for me, they were wrongly interpreted as lifecycle phases otherwise.
 All commands were done within IntelliJ local terminal, so other terminals or bash may require to leave the quotation marks away.
 Project built and compiled on JDK22 (may not compile using a different JDK).
 Please make sure to have Maven installed (and Docker if you want to use the docker container)
@@ -20,7 +20,8 @@ mvn compile quarkus:dev
 
 since the last given docker command (for testing) and running docker in general only worked for me after using all below commands first, please do run them before using the last command as well.
 
-Open Docker Desktop.
+Open Docker Desktop (build fails otherwise and container cannot run)
+
 Creating docker image (tag can be any other tag):
 docker build -f src/test/docker/Dockerfile --tag 5124119backendproject:1.0 .
 
