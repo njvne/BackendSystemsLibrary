@@ -36,12 +36,21 @@ public class BookPersistenceJpaAdapter implements DeleteBookPort, ReadAllBooksPo
     @Transactional
     public NoContentResult deleteBook(BookISBN bookISBN)
     {
+        System.out.println("Book ISBN " + bookISBN.getISBN());
         BookJpaEntity toDelete = this.em.find(BookJpaEntity.class, bookISBN.getISBN());
         if(toDelete == null)
         {
             final var res = new NoContentResult();
             res.setError(ErrorCodes.RESOURCE_NOT_FOUND, "Book to delete not found");
             return res;
+        }
+        TypedQuery<BookCopyJpaEntity> queue = em.createQuery(
+                "FROM BookCopyJpaEntity bc WHERE bc.book.isbn = :bookISBN", BookCopyJpaEntity.class);
+        queue.setParameter("bookISBN", bookISBN.getISBN());
+        final var bookCopy = queue.getResultList();
+        for(BookCopyJpaEntity bookCopyEntity : bookCopy)
+        {
+            this.em.remove(bookCopyEntity);
         }
         this.em.remove(toDelete);
         return new NoContentResult();

@@ -110,7 +110,8 @@ public class UserPersistenceJpaAdapter implements PersistUserPort, ReadUserByIdP
         ad.setSurname("Armin");
         ad.setEmail("admin@admin.com");
         ad.setPhonenumber(4417033545L);
-        try{
+        try
+        {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             String pass = Arrays.toString(digest.digest("adminpassword123".getBytes(StandardCharsets.UTF_8)));
             UserAuthJpaEntity ada = new UserAuthJpaEntity(ad, pass, AuthorizationLevel.ADMIN);

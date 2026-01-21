@@ -91,29 +91,14 @@ public class BookService implements DeleteBookUseCase, LoadAllBooksUseCase, Load
     }
 
     @Override
-    public NoContentResult deleteBook(BookISBN ISBN)
-    {
-        final var result =  this.deleteBookPort.deleteBook(ISBN);
+    public NoContentResult deleteBook(BookISBN ISBN) {
+        final var result = this.deleteBookPort.deleteBook(ISBN);
         final var returnValue = new NoContentResult();
-        if(result.hasError())
-        {
+        if (result.hasError()) {
             returnValue.setError(result.getErrorCode(), result.getErrorMessage());
             return returnValue;
-        }
-        else
-        {
+        } else {
             return result;
         }
-    }
-
-    @PostConstruct
-    public void populateBook()
-    {
-        Book nu = new Book(new BookISBN(123456789));
-        nu.setAuthor("amanda");
-        nu.setDescription("This is the description");
-        nu.setTitle("This is the title");
-        nu.setCopyAmount(2);
-        this.updateBookPort.updateBook(nu, new BookISBN(123456789));
     }
 }

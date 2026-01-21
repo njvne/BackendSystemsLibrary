@@ -1,23 +1,32 @@
 !!!!!IMPORTANT!!!!!!
 Commands including -Dquarkus require quotation marks (as documented here) because for me, they were wrongly interpreted as lifecycle phases otherwise.
 All commands were done within IntelliJ local terminal, so other terminals or bash may require to leave the quotation marks away.
-Project built and compiled on JDK22. Does not work on JDK25
+Project built and compiled on JDK22 (may not compile using a different JDK).
+Please make sure to have Maven installed (and Docker if you want to use the docker container)
+
+
 
 first of all, please do make sure to use "mvn verify" (and make sure both the pom.xml and pom-docker.xml have been added/ are compiled as maven projects)
+
+
+to run tests manually and or in isolation, go to Test file and run the class or only a selected test.
+(do not have the quarkus application started, the tests start and quit quarkus themselves)
+
 
 command to just run the application in quarkus:
 mvn compile quarkus:dev
 
 
-since the last given docker command (for testing) only worked for me after using all 4 below commands first, please do run them before using the last command as well. I had quite some issues setting up docker, so i really hope it works on another computer as well.
 
-Creating docker image:
-docker build -f src/test/docker/Dockerfile --tag myapp:1.0 .
-docker run --rm -p 8080:8080 myapp:1.0
+since the last given docker command (for testing) and running docker in general only worked for me after using all below commands first, please do run them before using the last command as well.
 
-running docker:
-mvn package
-mvn package -Dquarkus.package.jar.type=uber-jar"
+Open Docker Desktop.
+Creating docker image (tag can be any other tag):
+docker build -f src/test/docker/Dockerfile --tag 5124119backendproject:1.0 .
+
+Running docker:
+docker run --rm -p 8080:8080 5124119backendproject:1.0
+
 
 
 Integration testing: (this only worked for me after using mvn package and creating the docker build)
